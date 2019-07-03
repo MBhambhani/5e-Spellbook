@@ -1,27 +1,17 @@
 <template>
-  <v-expansion-panel>
-    <v-expansion-panel-content>
-      <template v-slot:header>
-        <div>Cantrips</div>
-      </template>
-      <v-card>
-        <v-card-text>{{ msg }}</v-card-text>
-      </v-card>
-    </v-expansion-panel-content>
-  </v-expansion-panel>
+  <v-layout column>
+    <SpellGroup/>
+  </v-layout>
 </template>
 
 <script>
 import axios from 'axios';
-
-// @ is an alias to /src
+import SpellGroup from '../components/SpellGroup.vue';
 
 export default {
   name: 'home',
-  data() {
-    return {
-      msg: '',
-    };
+  components: {
+    SpellGroup,
   },
   methods: {
     getMessage() {

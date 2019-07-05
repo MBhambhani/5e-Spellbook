@@ -4,10 +4,12 @@
       <template v-slot:header>
         <div>{{ level }}</div>
       </template>
-      <v-layout row>
-        <SpellCard v-for="(spell, index) in spells" :key="index"
-          :spellInfo="spell"/>
-      </v-layout>
+      <v-container grid-list-medium fluid>
+        <v-layout row wrap>
+          <SpellCard v-for="(spell, index) in spells" :key="index"
+            :spellInfo="spell"/>
+        </v-layout>
+      </v-container>
     </v-expansion-panel-content>
   </v-expansion-panel>
 </template>

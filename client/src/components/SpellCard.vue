@@ -1,6 +1,6 @@
 <template>
   <v-flex xs5 md3 mx-3 mb-3>
-    <v-card style="border: 3px solid deep-purple">
+    <v-card>
       <!-- HEADING -->
       <v-layout row px-3 pt-3 justify-space-between>
         <v-flex subheading xs8 md8>

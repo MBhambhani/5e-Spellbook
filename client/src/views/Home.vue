@@ -26,11 +26,11 @@ export default {
   data: () => ({
     spellLists: [
       {
-        level: 'Cantrips',
+        level: '0',
         spells: [],
       },
       {
-        level: 'Level 1',
+        level: '1',
         spells: [],
       },
     ],

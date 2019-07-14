@@ -2,7 +2,8 @@
   <v-expansion-panel>
     <v-expansion-panel-content>
       <template v-slot:header>
-        <div>{{ level }}</div>
+        <div v-if="level > 0">Level {{ level }}</div>
+        <div v-else>Cantrips</div>
       </template>
       <v-container grid-list-medium fluid>
         <v-layout row wrap>

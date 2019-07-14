@@ -23,7 +23,7 @@
       <!-- DETAILS -->
       <v-slide-y-transition>
         <v-layout column px-3 v-show="expand">
-          <v-flex pt-1>Range: {{ spellInfo.range }}</v-flex>
+          <v-flex pt-1>Range: {{ spellInfo.spell_range }}</v-flex>
           <v-flex pt-1>Duration: {{ spellInfo.duration }}</v-flex>
           <v-flex pt-1 v-show="spellInfo.material">
             Material(s): {{ spellInfo.material }}

@@ -24,32 +24,26 @@ export default {
     NavBar,
   },
   data: () => ({
-    spellLists: [
-      {
-        level: '0',
-        spells: [],
-      },
-      {
-        level: '1',
-        spells: [],
-      },
-    ],
+    spellLists: []
   }),
   methods: {
     handleChangeSpells(selectedClass) {
       const path = `http://127.0.0.1:5000/spells?filter=${selectedClass}`;
       axios.get(path)
         .then((response) => {
-          this.spellLists = response.data;
+          this.spellLists = this.filterSpellLists(response.data);
         })
         .catch((error) => {
           // eslint-disable-next-line
           console.error(error);
         });
     },
+    filterSpellLists(data) {
+      return data.filter(sp => sp.spells && sp.spells.length > 0);
+    }
   },
   created() {
-    this.getMessage();
+    //can add things here if needed
   },
 };
 </script>

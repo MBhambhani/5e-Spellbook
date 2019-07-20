@@ -1,42 +1,77 @@
 <template>
   <v-flex xs5 md3 mx-3 mb-3>
     <v-card>
-      <!-- HEADING -->
-      <v-layout row px-3 pt-3 justify-space-between>
-        <v-flex subheading xs8 md8>
-          {{ spellInfo.name }}
-        </v-flex>
-        <v-flex xs4 md4 text-xs-right font-weight-bold>
-          <span v-show="spellInfo.ritual">[R]</span>
-          <span v-show="spellInfo.concentration">[C]</span>
-        </v-flex>
-      </v-layout>
-      <!-- SUBHEADINGS -->
-      <v-layout row px-3 pt-2>
-        <span class="grey--text"><i>{{ spellInfo.school }}</i></span>
-      </v-layout>
-      <v-layout row px-3 pt-1>
-        {{ spellInfo.casting_time }}
-        <v-spacer/>
-        {{ spellInfo.components }}
-      </v-layout>
-      <!-- DETAILS -->
-      <v-slide-y-transition>
-        <v-layout column px-3 v-show="expand">
-          <v-flex pt-1>Range: {{ spellInfo.spell_range }}</v-flex>
-          <v-flex pt-1>Duration: {{ spellInfo.duration }}</v-flex>
-          <v-flex pt-1 v-show="spellInfo.material">
-            Material(s): {{ spellInfo.material }}
-          </v-flex>
-          <v-flex pt-3>{{ spellInfo.desc }}</v-flex>
-        </v-layout>
-      </v-slide-y-transition>
+      <v-card-title
+        primary-title
+      >
+        <h3>{{ spell.name }}</h3>
+      </v-card-title>
       <v-card-actions>
         <v-spacer/>
-        <v-btn icon @click="expand = !expand" text-xs-right>
-          <v-icon>{{ expand ? 'keyboard_arrow_up' :
-            'keyboard_arrow_down' }}</v-icon>
+        <v-btn
+          color="#9fd356"
+          dark
+          small
+        >
+          Add
         </v-btn>
+        <v-dialog
+          v-model="dialog"
+          width="75%"
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              color="#3c91e6"
+              dark
+              small
+              v-on="on"
+            >
+              Info
+            </v-btn>
+          </template>
+
+          <v-card>
+            <v-card-title
+              class="headline"
+              style="background:#fa824c;color:white"
+              primary-title
+            >
+              {{ spell.name }}
+            </v-card-title>
+            <v-card-text>
+              <v-flex pt-1>
+                <i>
+                  {{ spell.school }}
+                  <span v-show="spell.ritual"> ritual</span>
+                </i>
+              </v-flex>
+              <v-flex pt-1>Range: {{ spell.spell_range }}</v-flex>
+              <v-flex pt-1>Casting time: {{ spell.casting_time }}</v-flex>
+              <v-flex pt-1>
+                Duration:
+                <span v-show="spell.concentration"> Concentration, </span>
+                {{ spell.duration }}
+              </v-flex>
+              <v-flex pt-1>Components: {{ spell.components }}</v-flex>
+              <v-flex pt-1 v-show="spell.material">
+                Material(s): {{ spell.material }}
+              </v-flex>
+              <v-flex pt-3>{{ spell.desc }}</v-flex>
+            </v-card-text>
+
+            <v-divider></v-divider>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                flat
+                @click="dialog = false"
+              >
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-card-actions>
     </v-card>
   </v-flex>
@@ -45,9 +80,18 @@
 <script>
 export default {
   name: 'SpellCard',
-  props: ['spellInfo'],
+  props: ['spell'],
   data: () => ({
-    expand: false,
+    dialog: false,
   }),
 };
 </script>
+
+<style>
+.v-btn {
+  min-width: 0 !important;
+}
+h3 {
+  font-weight: normal;
+}
+</style>

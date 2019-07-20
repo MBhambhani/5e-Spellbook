@@ -1,14 +1,23 @@
 <template>
-  <v-layout row>
-    <v-flex xs3 md2>
-      <NavBar @change-spells="handleChangeSpells"/>
-    </v-flex>
-    <v-flex xs9 md10>
-      <v-layout column>
-        <SpellGroup v-for="(spellList, index) in spellLists" :key="index"
-          :level="spellList.level" :spells="spellList.spells"/>
-      </v-layout>
-    </v-flex>
+  <v-layout column>
+    <v-toolbar class="title-background elevation-0">
+      <v-toolbar-title class="title-text">Larrel's Tome</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-toolbar-items class="hidden-sm-and-down">
+        <v-btn flat><span class="title-text">Log out</span></v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-layout row>
+      <v-flex xs3 md2>
+        <NavBar @change-spells="handleChangeSpells"/>
+      </v-flex>
+      <v-flex xs9 md10>
+        <v-expansion-panel class="elevation-0">
+          <SpellGroup v-for="(spellList, index) in spellLists" :key="index"
+            :level="spellList.level" :spells="spellList.spells"/>
+        </v-expansion-panel>
+      </v-flex>
+    </v-layout>
   </v-layout>
 </template>
 
@@ -24,7 +33,7 @@ export default {
     NavBar,
   },
   data: () => ({
-    spellLists: []
+    spellLists: [],
   }),
   methods: {
     handleChangeSpells(selectedClass) {
@@ -40,10 +49,19 @@ export default {
     },
     filterSpellLists(data) {
       return data.filter(sp => sp.spells && sp.spells.length > 0);
-    }
+    },
   },
   created() {
-    //can add things here if needed
+    // can add things here if needed
   },
 };
 </script>
+
+<style>
+.title-text {
+  color:white;
+}
+.title-background {
+  background-color:#342e37 !important;
+}
+</style>

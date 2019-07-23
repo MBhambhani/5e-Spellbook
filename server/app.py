@@ -9,9 +9,27 @@ app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from models import Spell
+from models import User, Spell
 
 CORS(app, resources={r'/*': {'origins': '*'}})
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    email = request.form.get('email')
+    password = request.form.get('password')
+
+    user = User.query.filter(User.email == email).first()
+    if (user):
+        return jsonify({ 'message': 'Email already in use' }), 409
+    
+    try:
+        new_user = User(email, password)
+        db.session.add(new_user)
+        db.session.commit()
+        # TODO return something meaningful on success
+        return
+    except Exception as e:
+        return(str(e))
 
 def add_spells_to_book(spells, level, spellbook):
     spellbook.append({ 'level': level, 'spells': [sp.serialize() for sp in spells] })

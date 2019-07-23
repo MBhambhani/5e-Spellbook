@@ -51,9 +51,6 @@ export default {
       return data.filter(sp => sp.spells && sp.spells.length > 0);
     },
   },
-  created() {
-    // can add things here if needed
-  },
 };
 </script>
 

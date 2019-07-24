@@ -1,11 +1,11 @@
 <template>
-  <v-toolbar app clipped-left flat class="title-background">
-    <v-btn text icon @click="handleMenuClick()">
+  <v-toolbar app clipped-left flat color="#342e37">
+    <v-btn text icon @click="toggleDrawer()">
       <v-icon color="white">menu</v-icon>
     </v-btn>
-    <v-toolbar-title class="title-text">Larrel's Tome</v-toolbar-title>
+    <v-toolbar-title style="color:white">Larrel's Tome</v-toolbar-title>
     <v-spacer></v-spacer>
-    <v-btn flat><span class="title-text">Register/Log in</span></v-btn>
+    <v-btn flat color="white" @click="registerOrLogIn()">Register/Log in</v-btn>
   </v-toolbar>
 </template>
 
@@ -13,18 +13,12 @@
 export default {
   name: 'Toolbar',
   methods: {
-    handleMenuClick() {
+    toggleDrawer() {
       this.$emit('toggle-drawer');
+    },
+    registerOrLogIn() {
+      this.$emit('register-or-log-in');
     },
   },
 };
 </script>
-
-<style>
-.title-text {
-  color:white;
-}
-.title-background {
-  background-color:#342e37 !important;
-}
-</style>

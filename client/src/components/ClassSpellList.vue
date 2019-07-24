@@ -1,5 +1,5 @@
 <template>
-  <v-expansion-panel class="elevation-0">
+  <v-expansion-panel>
     <v-expansion-panel-content
       v-for="(spellGroup, index) in spellList"
       :key="index"

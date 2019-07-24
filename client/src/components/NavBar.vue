@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer app clipped v-model="drawer">
+  <v-navigation-drawer app clipped width="200" v-model="drawer">
     <v-list dense expand class="pt-0">
       <!-- BROWSE SPELLS -->
       <v-list-group>
@@ -63,8 +63,8 @@ export default {
     viewBook(selectedBook) {
       this.$emit('view-book', selectedBook);
     },
-    addBook() {
-
+    addBook(name) {
+      this.$emit('add-book', name);
     },
   },
   props: ['drawer'],

@@ -1,12 +1,18 @@
 <template>
   <v-app>
-    <Toolbar @toggle-drawer="drawer = !drawer"/>
-    <NavBar @change-spells="handleChangeSpells" :drawer="drawer"/>
+    <Toolbar
+      @toggle-drawer="drawer = !drawer"
+      @register-or-log-in="handleRegisterLogIn()"
+    />
+    <NavBar
+      @change-spells="handleChangeSpells"
+      @view-book="handleViewBook"
+      @add-book="handleAddBook"
+      :drawer="drawer"
+    />
     <v-content>
-      <v-flex shrink>
-        <ClassSpellList :spellList="spellList" v-show="!viewingSpellbooks"/>
-        <SpellBook :spellList="spellList" v-show="viewingSpellbooks"/>
-      </v-flex>
+      <ClassSpellList :spellList="spellList" v-show="!viewingSpellbooks"/>
+      <SpellBook :spellList="spellList" v-show="viewingSpellbooks"/>
     </v-content>
   </v-app>
 </template>
@@ -32,20 +38,29 @@ export default {
     drawer: true,
   }),
   methods: {
+    handleRegisterLogIn() {
+
+    },
     handleChangeSpells(selectedClass) {
       const path = `http://127.0.0.1:5000/spells?filter=${selectedClass}`;
       axios.get(path)
         .then((response) => {
           this.viewingSpellbooks = false;
-          this.spellList = this.filterSpellLists(response.data);
+          this.spellList = this.filterSpellList(response.data);
         })
         .catch((error) => {
           // eslint-disable-next-line
           console.error(error);
         });
     },
-    filterSpellLists(data) {
+    filterSpellList(data) {
       return data.filter(sp => sp.spells && sp.spells.length > 0);
+    },
+    handleViewBook() {
+      this.viewingSpellbooks = true;
+    },
+    handleAddBook() {
+
     },
   },
 };

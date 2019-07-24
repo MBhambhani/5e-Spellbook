@@ -8,7 +8,7 @@ class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   email = db.Column(db.String(120), unique=True, nullable=False)
   password = db.Column(db.String(255), nullable=False)
-  spellbooks = db.relationship('Spellbook', backref='creator', lazy=True)
+  spellbooks = db.relationship('Spellbook', backref='creator', lazy=False)
 
   def __init__(self, email, password):
     self.email = email

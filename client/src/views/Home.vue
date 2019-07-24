@@ -4,7 +4,7 @@
       <v-toolbar-title class="title-text">Larrel's Tome</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn flat><span class="title-text">Log out</span></v-btn>
+        <v-btn flat><span class="title-text">Register/Log in</span></v-btn>
       </v-toolbar-items>
     </v-toolbar>
     <v-layout row>

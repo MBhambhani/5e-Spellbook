@@ -8,6 +8,7 @@ class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   email = db.Column(db.String(120), unique=True, nullable=False)
   password = db.Column(db.String(255), nullable=False)
+  spellbooks = db.relationship('Spellbook', backref='creator', lazy=True)
 
   def __init__(self, email, password):
     self.email = email
@@ -17,7 +18,7 @@ class User(db.Model):
   def authenticate(cls, **kwargs):
     email = kwargs.get('email')
     password = kwargs.get('password')
-    
+
     if not email or not password:
       return None
     
@@ -75,7 +76,7 @@ class Spell(db.Model):
     self.level = level
   
   def __repr__(self):
-    return '<id {}>'.format(self.id)
+    return '<spell id {}>'.format(self.id)
   
   def serialize(self):
     return {
@@ -99,4 +100,31 @@ class Spell(db.Model):
       'warlock': self.warlock,
       'wizard': self.wizard,
       'level': self.level
+    }
+
+class Spellbook(db.Model):
+  __tablename__ = 'spellbooks'
+
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String(100), nullable=False)
+  creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+  spells = db.Column(db.String())
+
+  def __init__(self, name, creator_id):
+    self.name = name
+    self.creator_id = creator_id
+    self.spells = ''
+  
+  def __repr__(self):
+    return '<spellbook id {}'.format(self.id)
+  
+  def get_spells(self):
+    return self.spells.split(',')
+  
+  def serialize(self):
+    return {
+      'id': self.id,
+      'name': self.name,
+      'creator_id': self.creator_id,
+      'spells': self.spells
     }

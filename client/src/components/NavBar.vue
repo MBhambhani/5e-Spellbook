@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer permanent>
+  <v-navigation-drawer app clipped v-model="drawer">
     <v-list dense expand class="pt-0">
       <!-- BROWSE SPELLS -->
       <v-list-group>
@@ -60,13 +60,14 @@ export default {
     changeSpells(selectedClass) {
       this.$emit('change-spells', selectedClass);
     },
-    viewBook() {
-
+    viewBook(selectedBook) {
+      this.$emit('view-book', selectedBook);
     },
     addBook() {
 
     },
   },
+  props: ['drawer'],
   data: () => ({
     classNames: [
       'All',

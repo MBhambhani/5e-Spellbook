@@ -112,7 +112,7 @@ def get_spells():
 def create_spellbook():
     data = json.loads(request.get_json())
     book_name = data['book_name']
-    creator_id = data['creator_id']
+    creator_id = data['user_id']
 
     try:
         spellbook = Spellbook.query.filter(
@@ -135,7 +135,7 @@ def create_spellbook():
 def delete_spellbook():
     data = json.loads(request.get_json())
     book_id = data['book_id']
-    creator_id = data['creator_id']
+    creator_id = data['user_id']
 
     try:
         spellbook = Spellbook.query.filter(
@@ -152,16 +152,29 @@ def delete_spellbook():
     except Exception as e:
         return str(e)
 
+@app.route('/get-user-spellbooks', methods=['GET'])
+@token_required
+def get_user_spellbooks():
+    data = json.loads(request.get_json())
+    creator_id = data['user_id']
+
+    try:
+        spellbooks = Spellbook.query.filter(Spellbook.creator_id == creator_id).all()
+        book_names = [spellbook.name for spellbook in spellbooks]
+        return jsonify(book_names)
+    except Exception as e:
+        return str(e)
+
 @app.route('/get-spellbook', methods=['GET'])
 @token_required
 def get_spellbook():
     data = json.loads(request.get_json())
-    book_id = data['id']
-    creator_id = data['creator_id']
+    book_name = data['book_name']
+    creator_id = data['user_id']
 
     try:
         spellbook = Spellbook.query.filter(
-            Spellbook.id == book_id,
+            Spellbook.name == book_name,
             Spellbook.creator_id == creator_id
         ).first()
 

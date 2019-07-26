@@ -6,23 +6,23 @@ class User(db.Model):
   __tablename__ = 'users'
 
   id = db.Column(db.Integer, primary_key=True)
-  email = db.Column(db.String(120), unique=True, nullable=False)
+  username = db.Column(db.String(120), unique=True, nullable=False)
   password = db.Column(db.String(255), nullable=False)
   spellbooks = db.relationship('Spellbook', backref='creator', lazy=False)
 
-  def __init__(self, email, password):
-    self.email = email
+  def __init__(self, username, password):
+    self.username = username
     self.password = generate_password_hash(password, method='sha256')
   
   @classmethod
   def authenticate(cls, **kwargs):
-    email = kwargs.get('email')
+    username = kwargs.get('email')
     password = kwargs.get('password')
 
-    if not email or not password:
+    if not username or not password:
       return None
     
-    user = cls.query.filter_by(email=email).first()
+    user = cls.query.filter(User.username == username).first()
     if not user or not check_password_hash(user.password, password):
       return None
     

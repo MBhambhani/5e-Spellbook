@@ -38,7 +38,7 @@ def token_required(f):
         try:
             token = auth_headers[1]
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
-            user = User.query.filter(User.email == data['sub']).first()
+            user = User.query.filter(User.username == data['sub']).first()
 
             if not user:
                 raise RuntimeError('User not found')
@@ -55,16 +55,16 @@ def token_required(f):
 @app.route('/register', methods=['POST'])
 def register():
     data = json.loads(request.get_json())
-    email = data['email']
+    username = data['username']
     password = data['password']
     
     try:
-        user = User.query.filter(User.email == email).first()
+        user = User.query.filter(User.username == username).first()
 
         if user:
-            return jsonify({ 'message': 'Email already in use' }), 409
+            return jsonify({ 'message': 'Username already in use' }), 409
         
-        new_user = User(email, password)
+        new_user = User(username, password)
         db.session.add(new_user)
         db.session.commit()
         return jsonify({ 'message': 'User successfully created' }), 200
@@ -80,8 +80,7 @@ def login():
         return jsonify({ 'message': 'Invalid credentials', 'authenticated': False }), 401
     
     token = jwt.encode({
-        'sub': user.email,
-        'user': user.id,
+        'sub': user.username,
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(minutes=30)
     }, current_app.config['SECRET_KEY'])

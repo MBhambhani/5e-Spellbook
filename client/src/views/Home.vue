@@ -2,7 +2,8 @@
   <v-app>
     <Toolbar
       @toggle-drawer="drawer = !drawer"
-      @register-or-log-in="handleRegisterLogIn()"
+      @register="handleRegister"
+      @log-in="handleLogIn"
     />
     <NavBar
       @change-spells="handleChangeSpells"
@@ -14,6 +15,25 @@
       <ClassSpellList :spellList="spellList" v-show="!viewingSpellbooks"/>
       <SpellBook :spellList="spellList" v-show="viewingSpellbooks"/>
     </v-content>
+    <v-dialog
+      v-model="loading"
+      persistent
+      width="300"
+    >
+      <v-card
+        color="#fa824c"
+        dark
+      >
+        <v-card-text>
+          Loading...
+          <v-progress-linear
+            indeterminate
+            color="white"
+            class="mb-0"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -36,21 +56,28 @@ export default {
     spellList: [],
     viewingSpellbooks: false,
     drawer: true,
+    loading: false,
   }),
   methods: {
-    handleRegisterLogIn() {
+    handleRegister() {
+
+    },
+    handleLogIn() {
 
     },
     handleChangeSpells(selectedClass) {
       const path = `http://127.0.0.1:5000/spells?filter=${selectedClass}`;
+      this.loading = true;
       axios.get(path)
         .then((response) => {
           this.viewingSpellbooks = false;
           this.spellList = this.filterSpellList(response.data);
+          this.loading = false;
         })
         .catch((error) => {
           // eslint-disable-next-line
           console.error(error);
+          this.loading = false;
         });
     },
     filterSpellList(data) {

@@ -130,7 +130,8 @@ export default {
         });
     },
     handleLogout() {
-
+      this.jwt = '';
+      localStorage.removeItem('jwt');
     },
     getUserSpellbooks() {
       Utils.getAllBooksForUser(this.jwt)

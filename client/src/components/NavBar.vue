@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer app clipped width="200" v-model="drawer">
+  <v-navigation-drawer app clipped width="250" v-model="drawer">
     <v-list dense expand class="pt-0">
       <!-- BROWSE SPELLS -->
       <v-list-group>

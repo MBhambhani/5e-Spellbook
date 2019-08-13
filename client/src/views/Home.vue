@@ -1,19 +1,19 @@
 <template>
   <v-app>
     <Toolbar
-      @toggle-drawer="drawer = !drawer"
+      @toggle-drawer="isDrawerOpen = !isDrawerOpen"
       @register="handleRegister"
       @login="handleLogin"
       @logout="handleLogout"
-      :loggedIn="isLoggedIn"
+      :isLoggedIn="isLoggedIn"
     />
     <NavBar
       @view-class-spells="handleViewClassSpells"
       @view-book="handleViewBook"
       @create-book="handleCreateBook"
       @delete-book="handleDeleteBook"
-      :drawer="drawer"
-      :loggedIn="isLoggedIn"
+      :isDrawerOpen="isDrawerOpen"
+      :isLoggedIn="isLoggedIn"
       :spellbooks="spellbooks"
     />
     <v-content>
@@ -21,20 +21,21 @@
         @add-spell-to-book="handleAddSpellToBook"
         :spellList="spellList"
         :spellbooks="spellbooks"
-        v-show="!viewingSpellbooks"
+        v-if="!displayedBook"
       />
       <SpellBook
+        @remove-spell-from-book="handleRemoveSpellFromBook"
         :spellList="spellList"
-        v-show="viewingSpellbooks"
+        v-else
       />
     </v-content>
     <v-dialog
-      v-model="loading"
+      v-model="isLoading"
       persistent
       width="300"
     >
       <v-card
-        color="#fa824c"
+        color="accent"
         dark
       >
         <v-card-text>
@@ -48,20 +49,14 @@
       </v-card>
     </v-dialog>
     <v-snackbar
-      v-model="snackbar"
+      v-model="isSnackbarActive"
       :timeout="2000"
     >
-      <v-icon v-if="!snackbarError" color="#9fd356">check</v-icon>
-      <v-icon v-else color="#fa824c">error</v-icon>
+      <v-icon v-if="!isSnackbarError" color="success">check</v-icon>
+      <v-icon v-else color="error">error</v-icon>
+      <v-spacer/>
       {{ snackbarText }}
-      <v-btn
-        icon
-        @click="snackbar = false"
-      >
-        <v-icon color="white">
-          clear
-        </v-icon>
-      </v-btn>
+      <v-spacer/>
     </v-snackbar>
   </v-app>
 </template>
@@ -86,28 +81,28 @@ export default {
     spellbooks: [],
     jwt: localStorage.getItem('jwt') || '',
     userId: '',
-    viewingSpellbooks: false,
-    drawer: true,
-    loading: false,
-    snackbar: false,
+    displayedBook: '',
+    isDrawerOpen: true,
+    isLoading: false,
+    isSnackbarActive: false,
+    isSnackbarError: false,
     snackbarText: '',
-    snackbarError: false,
   }),
   methods: {
     handleViewClassSpells(selectedClass) {
-      this.loading = true;
+      this.isLoading = true;
       Utils.getSpells(selectedClass)
         .then((response) => {
-          this.viewingSpellbooks = false;
+          this.isLoading = false;
+          this.displayedBook = '';
           this.spellList = this.filterSpellList(response.data);
-          this.loading = false;
         })
         .catch((error) => {
           this.displayErrorMessage(error);
         });
     },
     handleRegister(userData) {
-      this.loading = true;
+      this.isLoading = true;
       Utils.register(userData)
         .then(() => {
           this.handleLogin(userData);
@@ -117,7 +112,7 @@ export default {
         });
     },
     handleLogin(userData) {
-      this.loading = true;
+      this.isLoading = true;
       Utils.login(userData)
         .then((response) => {
           this.jwt = response.data.token;
@@ -144,12 +139,12 @@ export default {
         });
     },
     handleViewBook(name) {
-      this.loading = true;
+      this.isLoading = true;
       Utils.getBook(name, this.jwt)
         .then((response) => {
-          this.viewingSpellbooks = true;
+          this.isLoading = false;
+          this.displayedBook = name;
           this.spellList = this.filterSpellList(response.data);
-          this.loading = false;
         })
         .catch((error) => {
           this.displayErrorMessage(error);
@@ -182,22 +177,36 @@ export default {
           this.displayErrorMessage(error);
         });
     },
+    handleRemoveSpellFromBook(spellId) {
+      Utils.removeFromBook({
+        book_name: this.displayedBook,
+        spell_id: spellId,
+      }, this.jwt)
+        .then((response) => {
+          // refresh spells shown on page
+          this.handleViewBook(this.displayedBook);
+          this.displaySuccessMessage(response);
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
+    },
     filterSpellList(data) {
       return data.filter(sp => sp.spells && sp.spells.length > 0);
     },
     displaySuccessMessage(response) {
+      this.isLoading = false;
       this.snackbarText = response.data.message;
-      this.snackbarError = false;
-      this.snackbar = true;
-      this.loading = false;
+      this.isSnackbarError = false;
+      this.isSnackbarActive = true;
     },
     displayErrorMessage(error) {
       // eslint-disable-next-line
       console.error(error);
-      this.loading = false;
+      this.isLoading = false;
       this.snackbarText = error.response ? error.response.data.message : 'Error!';
-      this.snackbarError = true;
-      this.snackbar = true;
+      this.isSnackbarError = true;
+      this.isSnackbarActive = true;
     },
   },
   computed: {

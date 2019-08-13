@@ -1,6 +1,10 @@
 <template>
   <v-layout column>
+    <div v-if="isBookEmpty" class="title text-xs-center mt-5">
+      Your spellbook is currently empty.
+    </div>
     <v-flex
+      v-else
       v-for="(spellGroup, index) in spellList"
       :key="index"
     >
@@ -15,6 +19,7 @@
       <v-layout row wrap>
         <SpellCard
           v-for="(spell, index) in spellGroup.spells"
+          @remove-spell="removeSpellFromBook"
           :spell="spell"
           :key="index"
         />
@@ -33,5 +38,21 @@ export default {
     SpellCard,
   },
   props: ['spellList'],
+  methods: {
+    removeSpellFromBook(spell) {
+      this.$emit('remove-spell-from-book', spell);
+    },
+  },
+  computed: {
+    isBookEmpty() {
+      let isEmpty = true;
+      this.spellList.forEach((spellGroup) => {
+        if (spellGroup.spells.length > 0) {
+          isEmpty = false;
+        }
+      });
+      return isEmpty;
+    },
+  },
 };
 </script>

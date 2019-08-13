@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer app clipped width="250" v-model="drawer">
+  <v-navigation-drawer app clipped width="250" v-model="isDrawerOpen">
     <v-list dense expand class="pt-0">
       <!-- BROWSE SPELLS -->
       <v-list-group>
@@ -22,7 +22,7 @@
         </v-list-tile>
       </v-list-group>
       <!-- MY SPELLBOOKS -->
-      <v-list-group v-show="loggedIn">
+      <v-list-group v-show="isLoggedIn">
         <template v-slot:activator>
           <v-list-tile>
             <v-list-tile-content>
@@ -53,6 +53,7 @@
               v-model="newBookName"
               :append-icon="newBookName == '' ? '' : 'add'"
               @click:append="createBook()"
+              color="secondary"
               type="text"
               placeholder="Add new spellbook"
               class="body-1"
@@ -67,7 +68,7 @@
 <script>
 export default {
   name: 'NavBar',
-  props: ['drawer', 'loggedIn', 'spellbooks'],
+  props: ['isDrawerOpen', 'isLoggedIn', 'spellbooks'],
   data: () => ({
     classNames: [
       'All',

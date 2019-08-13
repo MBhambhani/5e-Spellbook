@@ -8,6 +8,9 @@
       <v-card-actions>
         <v-spacer/>
         <SpellInfoModal :spell="spell"/>
+        <v-btn icon @click="removeSpell(spell.id)">
+          <v-icon color="error">delete</v-icon>
+        </v-btn>
         <v-spacer/>
       </v-card-actions>
     </v-card>
@@ -26,6 +29,11 @@ export default {
   data: () => ({
     dialog: false,
   }),
+  methods: {
+    removeSpell(spell) {
+      this.$emit('remove-spell', spell);
+    },
+  },
 };
 </script>
 

@@ -1,16 +1,16 @@
 <template>
-  <v-toolbar app clipped-left flat color="#342e37">
+  <v-toolbar app clipped-left flat color="primary">
     <v-btn text icon @click="toggleDrawer()">
       <v-icon color="white">menu</v-icon>
     </v-btn>
     <v-toolbar-title style="color:white">Larrel's Tome</v-toolbar-title>
     <v-spacer></v-spacer>
-    <v-btn flat color="white" v-show="loggedIn" @click="logout()">
+    <v-btn flat color="white" v-show="isLoggedIn" @click="logout()">
       Log out
     </v-btn>
     <v-dialog v-model="dialog" width="50%">
       <template v-slot:activator="{ on }">
-        <v-btn flat color="white" v-on="on" v-show="!loggedIn">
+        <v-btn flat color="white" v-on="on" v-show="!isLoggedIn">
           Register / Log in
         </v-btn>
       </template>
@@ -41,6 +41,7 @@
             @click="registerOrLogin('register')"
             class="form-button"
             :disabled="!formIsValid"
+            color="info"
           >
             Register
           </v-btn>
@@ -48,6 +49,7 @@
             @click="registerOrLogin('login')"
             class="form-button"
             :disabled="!formIsValid"
+            color="info"
           >
             Log In
           </v-btn>
@@ -60,7 +62,7 @@
 <script>
 export default {
   name: 'Toolbar',
-  props: ['spellbooks', 'loggedIn'],
+  props: ['spellbooks', 'isLoggedIn'],
   data: () => ({
     dialog: false,
     username: '',
@@ -98,10 +100,3 @@ export default {
   },
 };
 </script>
-
-<style>
-.form-button {
-  background-color:#3c91e6 !important;
-  color: white !important;
-}
-</style>

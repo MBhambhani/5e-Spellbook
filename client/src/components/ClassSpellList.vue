@@ -31,6 +31,7 @@
                     small
                     class="add-btn px-2"
                     v-on="on"
+                    color="secondary"
                   >
                     Add To
                   </v-btn>
@@ -93,8 +94,5 @@ export default {
 <style>
 .v-btn {
   min-width: 0 !important;
-}
-.add-btn {
-  background-color:#9fd356 !important;
 }
 </style>

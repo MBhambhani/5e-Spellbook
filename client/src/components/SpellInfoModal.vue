@@ -9,6 +9,7 @@
         dark
         small
         v-on="on"
+        color="info"
       >
         Info
       </v-btn>
@@ -18,6 +19,7 @@
       <v-card-title
         class="headline"
         primary-title
+        color="accent"
       >
         {{ spell.name }}
       </v-card-title>
@@ -66,13 +68,3 @@ export default {
   }),
 };
 </script>
-
-<style>
-.modal-btn {
-  background-color:#3c91e6 !important;
-}
-.headline {
-  background:#fa824c;
-  color:white;
-}
-</style>

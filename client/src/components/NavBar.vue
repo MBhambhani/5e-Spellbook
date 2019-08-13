@@ -13,7 +13,7 @@
         <v-list-tile
           v-for="(item, index) in classNames"
           :key="index"
-          @click="changeSpells(item)"
+          @click="viewClassSpells(item)"
           class="pl-3"
         >
           <v-list-tile-content>
@@ -22,7 +22,7 @@
         </v-list-tile>
       </v-list-group>
       <!-- MY SPELLBOOKS -->
-      <v-list-group>
+      <v-list-group v-show="loggedIn">
         <template v-slot:activator>
           <v-list-tile>
             <v-list-tile-content>
@@ -56,18 +56,7 @@
 <script>
 export default {
   name: 'NavBar',
-  methods: {
-    changeSpells(selectedClass) {
-      this.$emit('change-spells', selectedClass);
-    },
-    viewBook(selectedBook) {
-      this.$emit('view-book', selectedBook);
-    },
-    addBook(name) {
-      this.$emit('add-book', name);
-    },
-  },
-  props: ['drawer'],
+  props: ['drawer', 'loggedIn', 'spellbooks'],
   data: () => ({
     classNames: [
       'All',
@@ -80,7 +69,17 @@ export default {
       'Warlock',
       'Wizard',
     ],
-    spellbooks: [],
   }),
+  methods: {
+    viewClassSpells(selectedClass) {
+      this.$emit('view-class-spells', selectedClass);
+    },
+    viewBook(selectedBook) {
+      this.$emit('view-book', selectedBook);
+    },
+    addBook(name) {
+      this.$emit('add-book', name);
+    },
+  },
 };
 </script>

@@ -22,7 +22,12 @@ def token_required(f):
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get('Authorization', '').split()
+        request_data = request.get_json()
 
+        id_mismatch_msg = {
+            'message': 'Provided user ID does not match token.',
+            'authenticated': False
+        }
         invalid_msg = {
             'message': 'Invalid token. Registration and/or authentication required',
             'authenticated': False
@@ -38,8 +43,14 @@ def token_required(f):
         try:
             token = auth_headers[1]
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
-            user = User.query.filter(User.username == data['sub']).first()
 
+            # check if user_id specified in the request matches user ID stored in token
+            if not request_data is None:
+                if (request_data.get('user_id') != str(data['sub'])):
+                    return jsonify(id_mismatch_msg), 401
+
+            # check if user is valid
+            user = User.query.filter(User.id == data['sub']).first()
             if not user:
                 raise RuntimeError('User not found')
             
@@ -49,47 +60,12 @@ def token_required(f):
         except (jwt.InvalidTokenError, Exception) as e:
             print(e)
             return jsonify(invalid_msg), 401
-    
     return _verify
-
-@app.route('/register', methods=['POST'])
-def register():
-    data = json.loads(request.get_json())
-    username = data['username']
-    password = data['password']
-    
-    try:
-        user = User.query.filter(User.username == username).first()
-
-        if user:
-            return jsonify({ 'message': 'Username already in use' }), 409
-        
-        new_user = User(username, password)
-        db.session.add(new_user)
-        db.session.commit()
-        return jsonify({ 'message': 'User successfully created' }), 200
-    except Exception as e:
-        return str(e)
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    user = User.authenticate(**data)
-    
-    if not user:
-        return jsonify({ 'message': 'Invalid credentials', 'authenticated': False }), 401
-    
-    token = jwt.encode({
-        'sub': user.username,
-        'iat': datetime.utcnow(),
-        'exp': datetime.utcnow() + timedelta(minutes=30)
-    }, current_app.config['SECRET_KEY'])
-
-    return jsonify({ 'token': token.decode('UTF-8') })
 
 @app.route('/spells', methods=['GET'])
 def get_spells():
     class_filter = request.args.get('filter').lower()
+
     try:
         spell_list = []
 
@@ -101,17 +77,61 @@ def get_spells():
             for i in range(0,10):
                 spells = Spell.query.filter(getattr(Spell, class_filter) == True, Spell.level == i).all()
                 add_spells_to_list(spells, i, spell_list)
-        
         return jsonify(spell_list)
+    except Exception as e:
+        return str(e)
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    
+    try:
+        user = User.query.filter(User.username == username).first()
+
+        if user:
+            return jsonify({ 'message': 'Username already in use' }), 409
+        
+        new_user = User(username, password, datetime.utcnow())
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({ 'message': 'User successfully created' }), 200
+    except Exception as e:
+        return str(e)
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+
+    try:
+        user = User.authenticate(**data)
+        if not user:
+            return jsonify({ 'message': 'Invalid credentials', 'authenticated': False }), 401
+        
+        user.last_login = datetime.utcnow()
+        db.session.commit()
+
+        token = jwt.encode({
+            'sub': user.id,
+            'iat': datetime.utcnow(),
+            'exp': datetime.utcnow() + timedelta(days=1)
+        }, current_app.config['SECRET_KEY'])
+
+        return jsonify({
+            'token': token.decode('UTF-8'),
+            'user_id': user.id,
+            'message': 'Logged in as {0}'.format(user.username)
+        })
     except Exception as e:
         return str(e)
 
 @app.route('/create-spellbook', methods=['POST'])
 @token_required
 def create_spellbook():
-    data = json.loads(request.get_json())
-    book_name = data['book_name']
-    creator_id = data['user_id']
+    data = request.get_json()
+    book_name = data.get('book_name')
+    creator_id = data.get('user_id')
 
     try:
         spellbook = Spellbook.query.filter(
@@ -132,9 +152,9 @@ def create_spellbook():
 @app.route('/delete-spellbook', methods=['POST'])
 @token_required
 def delete_spellbook():
-    data = json.loads(request.get_json())
-    book_id = data['book_id']
-    creator_id = data['user_id']
+    data = request.get_json()
+    book_id = data.get('book_id')
+    creator_id = data.get('user_id')
 
     try:
         spellbook = Spellbook.query.filter(
@@ -154,8 +174,8 @@ def delete_spellbook():
 @app.route('/get-user-spellbooks', methods=['GET'])
 @token_required
 def get_user_spellbooks():
-    data = json.loads(request.get_json())
-    creator_id = data['user_id']
+    data = request.get_json()
+    creator_id = data.get('user_id')
 
     try:
         spellbooks = Spellbook.query.filter(Spellbook.creator_id == creator_id).all()
@@ -167,9 +187,9 @@ def get_user_spellbooks():
 @app.route('/get-spellbook', methods=['GET'])
 @token_required
 def get_spellbook():
-    data = json.loads(request.get_json())
-    book_name = data['book_name']
-    creator_id = data['user_id']
+    data = request.get_json()
+    book_name = data.get('book_name')
+    creator_id = data.get('user_id')
 
     try:
         spellbook = Spellbook.query.filter(

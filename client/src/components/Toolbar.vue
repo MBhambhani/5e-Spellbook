@@ -7,11 +7,14 @@
     <v-spacer></v-spacer>
     <v-dialog v-model="dialog" width="50%">
       <template v-slot:activator="{ on }">
-        <v-btn flat color="white" v-on="on">Register/Log in</v-btn>
+        <v-btn flat color="white" v-on="on">
+          <span v-show="!loggedIn">Register / Log in</span>
+          <span v-show="loggedIn">Log out</span>
+        </v-btn>
       </template>
       <v-card>
         <v-card-text>
-          <v-form v-model="valid">
+          <v-form ref="form">
             <v-text-field
               v-model="username"
               label="Username"
@@ -32,8 +35,20 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="register()" class="form-button">Register</v-btn>
-          <v-btn @click="logIn()" class="form-button">Log In</v-btn>
+          <v-btn
+            @click="registerOrLogin('register')"
+            class="form-button"
+            :disabled="!formIsValid"
+          >
+            Register
+          </v-btn>
+          <v-btn
+            @click="registerOrLogin('login')"
+            class="form-button"
+            :disabled="!formIsValid"
+          >
+            Log In
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -43,7 +58,11 @@
 <script>
 export default {
   name: 'Toolbar',
+  props: ['spellbooks', 'loggedIn'],
   data: () => ({
+    dialog: false,
+    username: '',
+    password: '',
     usernameRules: [
       v => !!v || 'Username is required',
     ],
@@ -55,10 +74,21 @@ export default {
     toggleDrawer() {
       this.$emit('toggle-drawer');
     },
-    registerOrLogIn() {
-      this.$emit('register-or-log-in');
+    clearUsernamePassword() {
+      this.$refs.form.reset();
     },
-    register() {
+    registerOrLogin(action) {
+      this.dialog = false;
+      this.$emit(action, {
+        username: this.username,
+        password: this.password,
+      });
+      this.clearUsernamePassword();
+    },
+  },
+  computed: {
+    formIsValid() {
+      return this.username && this.password;
     },
   },
 };

@@ -24,7 +24,27 @@
           <td>{{ props.item.casting_time }}</td>
           <td style="width:20%">
             <v-layout row>
-              <v-btn dark small class="add-btn px-2">Add</v-btn>
+              <v-menu offset-y>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    dark
+                    small
+                    class="add-btn px-2"
+                    v-on="on"
+                  >
+                    Add To
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-tile
+                    v-for="(book, index) in spellbooks"
+                    :key="index"
+                    @click="addToBook(book, props.item.id)"
+                  >
+                    <v-list-tile-title>{{ book }}</v-list-tile-title>
+                  </v-list-tile>
+                </v-list>
+              </v-menu>
               <SpellInfoModal :spell="props.item"/>
             </v-layout>
           </td>
@@ -42,7 +62,7 @@ export default {
   components: {
     SpellInfoModal,
   },
-  props: ['spellList'],
+  props: ['spellList', 'spellbooks'],
   data: () => ({
     headers: [
       {
@@ -62,6 +82,11 @@ export default {
       },
     ],
   }),
+  methods: {
+    addToBook(book, spell) {
+      this.$emit('add-spell-to-book', { book_name: book, spell_id: spell });
+    },
+  },
 };
 </script>
 

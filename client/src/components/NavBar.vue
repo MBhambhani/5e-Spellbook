@@ -51,7 +51,7 @@
           <v-list-tile-content>
             <v-text-field
               v-model="newBookName"
-              :append-icon="'add'"
+              :append-icon="newBookName == '' ? '' : 'add'"
               @click:append="createBook()"
               type="text"
               placeholder="Add new spellbook"
@@ -90,11 +90,11 @@ export default {
       this.$emit('view-book', book);
     },
     createBook() {
-      this.$emit('create-book', this.newBookName);
+      this.$emit('create-book', { book_name: this.newBookName });
       this.newBookName = '';
     },
     deleteBook(book) {
-      this.$emit('delete-book', book);
+      this.$emit('delete-book', { book_name: book });
     },
   },
 };

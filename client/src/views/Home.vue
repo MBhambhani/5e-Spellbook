@@ -17,8 +17,16 @@
       :spellbooks="spellbooks"
     />
     <v-content>
-      <ClassSpellList :spellList="spellList" v-show="!viewingSpellbooks"/>
-      <SpellBook :spellList="spellList" v-show="viewingSpellbooks"/>
+      <ClassSpellList
+        @add-spell-to-book="handleAddSpellToBook"
+        :spellList="spellList"
+        :spellbooks="spellbooks"
+        v-show="!viewingSpellbooks"
+      />
+      <SpellBook
+        :spellList="spellList"
+        v-show="viewingSpellbooks"
+      />
     </v-content>
     <v-dialog
       v-model="loading"
@@ -43,11 +51,9 @@
       v-model="snackbar"
       :timeout="2000"
     >
-      <v-icon v-show="!snackbarError" color="#9fd356">check</v-icon>
-      <v-icon v-show="snackbarError" color="#fa824c">error</v-icon>
-      <span class="ml-3">
-        {{ snackbarText }}
-      </span>
+      <v-icon v-if="!snackbarError" color="#9fd356">check</v-icon>
+      <v-icon v-else color="#fa824c">error</v-icon>
+      {{ snackbarText }}
       <v-btn
         color="#3c91e6"
         flat
@@ -147,8 +153,8 @@ export default {
           this.displayErrorMessage(error);
         });
     },
-    handleCreateBook(name) {
-      Utils.createBook({ book_name: name }, this.jwt)
+    handleCreateBook(data) {
+      Utils.createBook(data, this.jwt)
         .then(() => {
           this.getUserSpellbooks();
         })
@@ -156,14 +162,23 @@ export default {
           this.displayErrorMessage(error);
         });
     },
-    handleDeleteBook(name) {
-      Utils.deleteBook({ book_name: name }, this.jwt)
+    handleDeleteBook(data) {
+      Utils.deleteBook(data, this.jwt)
         .then(() => {
           this.getUserSpellbooks();
         })
         .catch((error) => {
           this.displayErrorMessage(error);
         });
+    },
+    handleAddSpellToBook(data) {
+      Utils.addToBook(data, this.jwt)
+        .then((response) => {
+          this.displaySuccessMessage(response);
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        })
     },
     filterSpellList(data) {
       return data.filter(sp => sp.spells && sp.spells.length > 0);

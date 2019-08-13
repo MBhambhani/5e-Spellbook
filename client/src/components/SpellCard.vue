@@ -7,14 +7,6 @@
         <h3>{{ spell.name }}</h3>
       </v-card-title>
       <v-card-actions>
-        <v-spacer/>
-        <v-btn
-          color="#9fd356"
-          dark
-          small
-        >
-          Add
-        </v-btn>
         <v-dialog
           v-model="dialog"
           width="75%"

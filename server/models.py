@@ -119,6 +119,12 @@ class Spellbook(db.Model):
     if (self.spells == ''):
       return []
     return self.spells.split(',')
+
+  def add_spell(self, spell_id):
+    if (self.spells == ''):
+      self.spells += spell_id
+    else:
+      self.spells += "," + spell_id
   
   def serialize(self):
     return {

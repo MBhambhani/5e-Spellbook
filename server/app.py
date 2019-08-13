@@ -201,9 +201,29 @@ def get_spellbook(user_id):
 
 @app.route('/add-to-spellbook', methods=['POST'])
 @token_required
-def add_to_spellbook():
-    #TODO
-    return
+def add_to_spellbook(user_id):
+    data = request.get_json()
+    book_name = data.get('book_name')
+    spell_id = data.get('spell_id')
+
+    try:
+        spellbook = Spellbook.query.filter(
+            Spellbook.name == book_name,
+            Spellbook.creator_id == user_id
+        ).first()
+        spell = Spell.query.filter_by(id=spell_id).first()
+
+        if not spellbook:
+            return jsonify({ 'message': 'Spellbook not found' }), 422
+
+        if not spell:
+            return jsonify({ 'message': 'Spell not found' }), 422
+
+        spellbook.add_spell(str(spell_id))
+        db.session.commit()
+        return jsonify({ 'message': '{0} added to {1}'.format(spell.name, spellbook.name) })
+    except Exception as e:
+        return str(e)
 
 @app.route('/remove-from-spellbook', methods=['POST'])
 @token_required

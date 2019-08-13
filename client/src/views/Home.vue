@@ -4,12 +4,14 @@
       @toggle-drawer="drawer = !drawer"
       @register="handleRegister"
       @login="handleLogin"
+      @logout="handleLogout"
       :loggedIn="isLoggedIn"
     />
     <NavBar
       @view-class-spells="handleViewClassSpells"
       @view-book="handleViewBook"
-      @add-book="handleAddBook"
+      @create-book="handleCreateBook"
+      @delete-book="handleDeleteBook"
       :drawer="drawer"
       :loggedIn="isLoggedIn"
       :spellbooks="spellbooks"
@@ -75,7 +77,7 @@ export default {
   data: () => ({
     spellList: [],
     spellbooks: [],
-    jwt: '',
+    jwt: localStorage.getItem('jwt') || '',
     userId: '',
     viewingSpellbooks: false,
     drawer: true,
@@ -113,14 +115,19 @@ export default {
         .then((response) => {
           this.jwt = response.data.token;
           this.userId = response.data.user_id;
+          localStorage.setItem('jwt', this.jwt);
           this.displaySuccessMessage(response);
+          this.getUserSpellbooks();
         })
         .catch((error) => {
           this.displayErrorMessage(error);
         });
     },
+    handleLogout() {
+
+    },
     getUserSpellbooks() {
-      Utils.getAllBooksForUser({ user_id: this.userId }, this.jwt)
+      Utils.getAllBooksForUser(this.jwt)
         .then((response) => {
           this.spellbooks = response.data;
         })
@@ -130,7 +137,7 @@ export default {
     },
     handleViewBook(name) {
       this.loading = true;
-      Utils.getBook({ book_name: name, user_id: this.userId }, this.jwt)
+      Utils.getBook(name, this.jwt)
         .then((response) => {
           this.viewingSpellbooks = true;
           this.spellList = this.filterSpellList(response.data);
@@ -140,11 +147,23 @@ export default {
           this.displayErrorMessage(error);
         });
     },
-    handleAddBook(name) {
-
+    handleCreateBook(name) {
+      Utils.createBook({ book_name: name }, this.jwt)
+        .then(() => {
+          this.getUserSpellbooks();
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
     },
     handleDeleteBook(name) {
-
+      Utils.deleteBook({ book_name: name }, this.jwt)
+        .then(() => {
+          this.getUserSpellbooks();
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
     },
     filterSpellList(data) {
       return data.filter(sp => sp.spells && sp.spells.length > 0);
@@ -156,12 +175,12 @@ export default {
       this.loading = false;
     },
     displayErrorMessage(error) {
-      this.snackbarText = error.response.data.message;
-      this.snackbarError = true;
-      this.snackbar = true;
-      this.loading = false;
       // eslint-disable-next-line
       console.error(error);
+      this.loading = false;
+      this.snackbarText = error.response ? error.response.data.message : 'Error!';
+      this.snackbarError = true;
+      this.snackbar = true;
     },
   },
   computed: {
@@ -171,8 +190,13 @@ export default {
       }
       const token = this.jwt.split('.');
       const body = JSON.parse(atob(token[1]));
-      return Date.now() < (body.exp*1000);
+      return Date.now() < (body.exp * 1000);
     },
+  },
+  mounted() {
+    if (this.jwt) {
+      this.getUserSpellbooks();
+    }
   },
 };
 </script>

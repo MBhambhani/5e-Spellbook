@@ -5,11 +5,13 @@
     </v-btn>
     <v-toolbar-title style="color:white">Larrel's Tome</v-toolbar-title>
     <v-spacer></v-spacer>
+    <v-btn flat color="white" v-show="loggedIn" @click="logout()">
+      Log out
+    </v-btn>
     <v-dialog v-model="dialog" width="50%">
       <template v-slot:activator="{ on }">
-        <v-btn flat color="white" v-on="on">
-          <span v-show="!loggedIn">Register / Log in</span>
-          <span v-show="loggedIn">Log out</span>
+        <v-btn flat color="white" v-on="on" v-show="!loggedIn">
+          Register / Log in
         </v-btn>
       </template>
       <v-card>
@@ -84,6 +86,9 @@ export default {
         password: this.password,
       });
       this.clearUsernamePassword();
+    },
+    logout() {
+      this.$emit('logout');
     },
   },
   computed: {

@@ -78,9 +78,6 @@ class Spell(db.Model):
     self.wizard = wizard
     self.level = level
   
-  def __repr__(self):
-    return '<spell id {}>'.format(self.id)
-  
   def serialize(self):
     return {
       'id': self.id,
@@ -118,10 +115,9 @@ class Spellbook(db.Model):
     self.creator_id = creator_id
     self.spells = ''
   
-  def __repr__(self):
-    return '<spellbook id {}'.format(self.id)
-  
   def get_spells(self):
+    if (self.spells == ''):
+      return []
     return self.spells.split(',')
   
   def serialize(self):

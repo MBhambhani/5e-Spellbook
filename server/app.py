@@ -22,12 +22,7 @@ def token_required(f):
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get('Authorization', '').split()
-        request_data = request.get_json()
 
-        id_mismatch_msg = {
-            'message': 'Provided user ID does not match token.',
-            'authenticated': False
-        }
         invalid_msg = {
             'message': 'Invalid token. Registration and/or authentication required',
             'authenticated': False
@@ -43,18 +38,12 @@ def token_required(f):
         try:
             token = auth_headers[1]
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
-
-            # check if user_id specified in the request matches user ID stored in token
-            if not request_data is None:
-                if (request_data.get('user_id') != str(data['sub'])):
-                    return jsonify(id_mismatch_msg), 401
-
-            # check if user is valid
             user = User.query.filter(User.id == data['sub']).first()
+
             if not user:
                 raise RuntimeError('User not found')
             
-            return f(user, *args, **kwargs)
+            return f(user.id, *args, **kwargs)
         except jwt.ExpiredSignatureError:
             return jsonify(expired_msg), 401
         except (jwt.InvalidTokenError, Exception) as e:
@@ -128,21 +117,20 @@ def login():
 
 @app.route('/create-spellbook', methods=['POST'])
 @token_required
-def create_spellbook():
+def create_spellbook(user_id):
     data = request.get_json()
     book_name = data.get('book_name')
-    creator_id = data.get('user_id')
 
     try:
         spellbook = Spellbook.query.filter(
             Spellbook.name == book_name,
-            Spellbook.creator_id == creator_id
+            Spellbook.creator_id == user_id
         ).first()
 
         if spellbook:
             return jsonify({ 'message': 'Name already in use' }), 422
         
-        new_spellbook = Spellbook(book_name, creator_id)
+        new_spellbook = Spellbook(book_name, user_id)
         db.session.add(new_spellbook)
         db.session.commit()
         return jsonify(new_spellbook.serialize()), 201
@@ -151,21 +139,20 @@ def create_spellbook():
 
 @app.route('/delete-spellbook', methods=['POST'])
 @token_required
-def delete_spellbook():
+def delete_spellbook(user_id):
     data = request.get_json()
-    book_id = data.get('book_id')
-    creator_id = data.get('user_id')
+    book_name = data.get('book_name')
 
     try:
         spellbook = Spellbook.query.filter(
-            Spellbook.id == book_id,
-            Spellbook.creator_id == creator_id
+            Spellbook.name == book_name,
+            Spellbook.creator_id == user_id
         ).first()
 
         if not spellbook:
             return jsonify({ 'message': 'Spellbook not found' }), 422
         
-        Spellbook.query.filter(Spellbook.id == book_id).delete()
+        Spellbook.query.filter(Spellbook.name == book_name).delete()
         db.session.commit()
         return jsonify({ 'message': '{} deleted'.format(book_name) })
     except Exception as e:
@@ -173,12 +160,9 @@ def delete_spellbook():
 
 @app.route('/get-user-spellbooks', methods=['GET'])
 @token_required
-def get_user_spellbooks():
-    data = request.get_json()
-    creator_id = data.get('user_id')
-
+def get_user_spellbooks(user_id):
     try:
-        spellbooks = Spellbook.query.filter(Spellbook.creator_id == creator_id).all()
+        spellbooks = Spellbook.query.filter(Spellbook.creator_id == user_id).all()
         book_names = [spellbook.name for spellbook in spellbooks]
         return jsonify(book_names)
     except Exception as e:
@@ -186,15 +170,13 @@ def get_user_spellbooks():
 
 @app.route('/get-spellbook', methods=['GET'])
 @token_required
-def get_spellbook():
-    data = request.get_json()
-    book_name = data.get('book_name')
-    creator_id = data.get('user_id')
+def get_spellbook(user_id):
+    book_name = request.args.get('name')
 
     try:
         spellbook = Spellbook.query.filter(
             Spellbook.name == book_name,
-            Spellbook.creator_id == creator_id
+            Spellbook.creator_id == user_id
         ).first()
 
         if not spellbook:
@@ -202,10 +184,11 @@ def get_spellbook():
         
         spell_list = []
         grouped_spells = [[] for i in range(0,10)]
+        spells = spellbook.get_spells()
 
         # get spells by id and group them by level
-        for spell_id in spellbook.get_spells():
-            spell = Spell.query.filter(Spell.id == spell_id).first()
+        for spell_id in spells:
+            spell = Spell.query.filter(Spell.id == int(spell_id)).first()
             grouped_spells[spell.level].append(spell)
         
         # build spell list to return

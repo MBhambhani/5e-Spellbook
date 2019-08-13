@@ -33,19 +33,30 @@
         <v-list-tile
           v-for="(book, index) in spellbooks"
           :key="index"
-          @click="viewBook(book)"
           class="pl-3"
+          @click="viewBook(book)"
         >
           <v-list-tile-content>
             <v-list-tile-title>{{ book }}</v-list-tile-title>
           </v-list-tile-content>
+          <v-list-tile-action>
+            <v-btn icon @click.stop="deleteBook(book)">
+              <v-icon color="grey">delete</v-icon>
+            </v-btn>
+          </v-list-tile-action>
         </v-list-tile>
         <v-list-tile
-          @click="addBook()"
           class="pl-3"
         >
           <v-list-tile-content>
-            <v-list-tile-title>Add new spellbook</v-list-tile-title>
+            <v-text-field
+              v-model="newBookName"
+              :append-icon="'add'"
+              @click:append="createBook()"
+              type="text"
+              placeholder="Add new spellbook"
+              class="body-1"
+            />
           </v-list-tile-content>
         </v-list-tile>
       </v-list-group>
@@ -69,16 +80,21 @@ export default {
       'Warlock',
       'Wizard',
     ],
+    newBookName: '',
   }),
   methods: {
-    viewClassSpells(selectedClass) {
-      this.$emit('view-class-spells', selectedClass);
+    viewClassSpells(cls) {
+      this.$emit('view-class-spells', cls);
     },
-    viewBook(selectedBook) {
-      this.$emit('view-book', selectedBook);
+    viewBook(book) {
+      this.$emit('view-book', book);
     },
-    addBook(name) {
-      this.$emit('add-book', name);
+    createBook() {
+      this.$emit('create-book', this.newBookName);
+      this.newBookName = '';
+    },
+    deleteBook(book) {
+      this.$emit('delete-book', book);
     },
   },
 };

@@ -22,12 +22,12 @@ function deleteBook(data, jwt) {
   return axios.post(`${API_URL}/delete-spellbook`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
-function getAllBooksForUser(data, jwt) {
-  return axios.get(`${API_URL}/get-user-spellbooks`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
+function getAllBooksForUser(jwt) {
+  return axios.get(`${API_URL}/get-user-spellbooks`, { headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
-function getBook(data, jwt) {
-  return axios.get(`${API_URL}/get-spellbook`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
+function getBook(name, jwt) {
+  return axios.get(`${API_URL}/get-spellbook?name=${name}`, { headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
 function addToBook(data, jwt) {

@@ -55,11 +55,12 @@
       <v-icon v-else color="#fa824c">error</v-icon>
       {{ snackbarText }}
       <v-btn
-        color="#3c91e6"
-        flat
+        icon
         @click="snackbar = false"
       >
-        Close
+        <v-icon color="white">
+          clear
+        </v-icon>
       </v-btn>
     </v-snackbar>
   </v-app>
@@ -179,7 +180,7 @@ export default {
         })
         .catch((error) => {
           this.displayErrorMessage(error);
-        })
+        });
     },
     filterSpellList(data) {
       return data.filter(sp => sp.spells && sp.spells.length > 0);

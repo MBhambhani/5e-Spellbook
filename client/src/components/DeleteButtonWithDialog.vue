@@ -39,6 +39,7 @@ export default {
   }),
   methods: {
     confirm() {
+      this.dialog = false;
       this.$emit('confirm');
     },
   },

@@ -121,10 +121,15 @@ class Spellbook(db.Model):
     return self.spells.split(',')
 
   def add_spell(self, spell_id):
+    if spell_id in self.get_spells():
+      return False
+
     if self.spells == '':
       self.spells += spell_id
     else:
       self.spells += ',' + spell_id
+    
+    return True
   
   def remove_spell(self, spell_id):
     spells = self.get_spells()

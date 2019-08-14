@@ -219,7 +219,11 @@ def add_to_spellbook(user_id):
         if not spell:
             return jsonify({ 'message': 'Spell not found' }), 422
 
-        spellbook.add_spell(str(spell_id))
+        if not spellbook.add_spell(str(spell_id)):
+            return jsonify({
+                'message': '{0} already contains {1}'.format(spellbook.name, spell.name)
+                }), 422
+        
         db.session.commit()
         return jsonify({ 'message': '{0} added to {1}'.format(spell.name, spellbook.name) })
     except Exception as e:

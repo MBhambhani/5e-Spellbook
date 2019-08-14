@@ -40,9 +40,11 @@
             <v-list-tile-title>{{ book }}</v-list-tile-title>
           </v-list-tile-content>
           <v-list-tile-action>
-            <v-btn icon @click.stop="deleteBook(book)">
-              <v-icon color="grey">delete</v-icon>
-            </v-btn>
+            <DeleteButtonWithDialog
+              @confirm="deleteBook(book)"
+              :icon="'delete'"
+              :message="'Are you sure you want to delete ' + book + '?'"
+            />
           </v-list-tile-action>
         </v-list-tile>
         <v-list-tile
@@ -66,8 +68,13 @@
 </template>
 
 <script>
+import DeleteButtonWithDialog from './DeleteButtonWithDialog.vue';
+
 export default {
   name: 'NavBar',
+  components: {
+    DeleteButtonWithDialog,
+  },
   props: ['isDrawerOpen', 'isLoggedIn', 'spellbooks'],
   data: () => ({
     classNames: [

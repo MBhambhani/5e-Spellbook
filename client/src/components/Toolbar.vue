@@ -1,10 +1,12 @@
 <template>
-  <v-toolbar app clipped-left flat color="primary">
+  <v-toolbar app clipped-left flat color="primary" class="white--text">
     <v-btn text icon @click="toggleDrawer()">
       <v-icon color="white">menu</v-icon>
     </v-btn>
-    <v-toolbar-title style="color:white">Larrel's Tome</v-toolbar-title>
-    <v-spacer></v-spacer>
+    <v-toolbar-title class="font-weight-black">Larrel's Tome</v-toolbar-title>
+    <v-spacer/>
+    <span class="text-uppercase">{{ title }}</span>
+    <v-spacer/>
     <v-btn flat color="white" v-show="isLoggedIn" @click="logout()">
       Log out
     </v-btn>
@@ -39,7 +41,6 @@
           <v-spacer></v-spacer>
           <v-btn
             @click="registerOrLogin('register')"
-            class="form-button"
             :disabled="!formIsValid"
             color="info"
           >
@@ -47,7 +48,6 @@
           </v-btn>
           <v-btn
             @click="registerOrLogin('login')"
-            class="form-button"
             :disabled="!formIsValid"
             color="info"
           >
@@ -62,7 +62,7 @@
 <script>
 export default {
   name: 'Toolbar',
-  props: ['spellbooks', 'isLoggedIn'],
+  props: ['spellbooks', 'isLoggedIn', 'title'],
   data: () => ({
     dialog: false,
     username: '',

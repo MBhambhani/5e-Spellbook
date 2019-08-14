@@ -6,6 +6,7 @@
       @login="handleLogin"
       @logout="handleLogout"
       :isLoggedIn="isLoggedIn"
+      :title="displayedBook || displayedClass && displayedClass + ' Spells'"
     />
     <NavBar
       @view-class-spells="handleViewClassSpells"
@@ -53,7 +54,7 @@
       :timeout="2000"
     >
       <v-icon v-if="!isSnackbarError" color="success">check</v-icon>
-      <v-icon v-else color="error">error</v-icon>
+      <v-icon v-else color="warning">error</v-icon>
       <v-spacer/>
       {{ snackbarText }}
       <v-spacer/>
@@ -82,6 +83,7 @@ export default {
     jwt: localStorage.getItem('jwt') || '',
     userId: '',
     displayedBook: '',
+    displayedClass: '',
     isDrawerOpen: true,
     isLoading: false,
     isSnackbarActive: false,
@@ -95,6 +97,7 @@ export default {
         .then((response) => {
           this.isLoading = false;
           this.displayedBook = '';
+          this.displayedClass = selectedClass;
           this.spellList = this.filterSpellList(response.data);
         })
         .catch((error) => {
@@ -144,6 +147,7 @@ export default {
         .then((response) => {
           this.isLoading = false;
           this.displayedBook = name;
+          this.displayedClass = '';
           this.spellList = this.filterSpellList(response.data);
         })
         .catch((error) => {
@@ -162,6 +166,10 @@ export default {
     handleDeleteBook(data) {
       Utils.deleteBook(data, this.jwt)
         .then(() => {
+          if (data.book_name === this.displayedBook) {
+            this.spellList = [];
+            this.displayedBook = '';
+          }
           this.getUserSpellbooks();
         })
         .catch((error) => {

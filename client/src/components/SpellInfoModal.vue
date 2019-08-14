@@ -17,9 +17,8 @@
 
     <v-card>
       <v-card-title
-        class="headline"
+        class="headline accent white--text"
         primary-title
-        color="accent"
       >
         {{ spell.name }}
       </v-card-title>

@@ -1,16 +1,22 @@
 <template>
   <v-flex xs5 md3 mx-3 mb-4>
     <v-card>
-      <v-card-text class="text-xs-center">
-        <h3>{{ spell.name }}</h3>
-        {{ spell.casting_time }} | {{ spell.spell_range }}
+      <div class="text-xs-right">
+        <v-spacer/>
+        <DeleteButtonWithDialog
+          @confirm="removeSpell(spell.id)"
+          :icon="'clear'"
+          :message="'Are you sure you want to remove ' + spell.name + '?'"
+        />
+      </div>
+      <v-card-text class="text-xs-center pt-0 pb-2">
+        <p class="title">{{ spell.name }}</p>
+        <div>Range: {{ spell.spell_range }}</div>
+        {{ spell.casting_time }}
       </v-card-text>
       <v-card-actions>
         <v-spacer/>
-        <SpellInfoModal :spell="spell"/>
-        <v-btn icon @click="removeSpell(spell.id)">
-          <v-icon color="error">delete</v-icon>
-        </v-btn>
+          <SpellInfoModal :spell="spell"/>
         <v-spacer/>
       </v-card-actions>
     </v-card>
@@ -19,19 +25,19 @@
 
 <script>
 import SpellInfoModal from './SpellInfoModal.vue';
+import DeleteButtonWithDialog from './DeleteButtonWithDialog.vue';
 
 export default {
   name: 'SpellCard',
   components: {
     SpellInfoModal,
+    DeleteButtonWithDialog,
   },
   props: ['spell'],
-  data: () => ({
-    dialog: false,
-  }),
   methods: {
     removeSpell(spell) {
       this.$emit('remove-spell', spell);
+      this.dialog = false;
     },
   },
 };
@@ -40,8 +46,5 @@ export default {
 <style>
 .v-btn {
   min-width: 0 !important;
-}
-h3 {
-  font-weight: normal;
 }
 </style>

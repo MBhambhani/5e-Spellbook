@@ -15,39 +15,96 @@ function login(userData) {
 }
 
 function createBook(data, jwt) {
-  return axios.post(`${API_URL}/create-spellbook`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
+  return axios.post(
+    `${API_URL}/create-spellbook`,
+    data,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
 }
 
 function deleteBook(data, jwt) {
-  return axios.post(`${API_URL}/delete-spellbook`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
+  return axios.post(
+    `${API_URL}/delete-spellbook`,
+    data,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
 }
 
 function getAllBooksForUser(jwt) {
-  return axios.get(`${API_URL}/get-user-spellbooks`, { headers: { Authorization: `Bearer: ${jwt}` } });
+  return axios.get(
+    `${API_URL}/get-user-spellbooks`,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
 }
 
 function getBook(name, jwt) {
-  return axios.get(`${API_URL}/get-spellbook?name=${name}`, { headers: { Authorization: `Bearer: ${jwt}` } });
+  return axios.get(
+    `${API_URL}/get-spellbook?name=${name}`,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
 }
 
-function addToBook(data, jwt) {
-  return axios.post(`${API_URL}/add-to-spellbook`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
+function addSpellToBook(data, jwt) {
+  return axios.post(
+    `${API_URL}/add-spell-to-spellbook`,
+    data,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
 }
 
-function removeFromBook(data, jwt) {
-  return axios.post(`${API_URL}/remove-from-spellbook`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
+function removeSpellFromBook(data, jwt) {
+  return axios.post(
+    `${API_URL}/remove-spell-from-spellbook`,
+    data,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
 }
 
 function getCustomSpells(jwt) {
-  return axios.get(`${API_URL}/get-custom-spells`, { headers: { Authorization: `Bearer: ${jwt}` } });
+  return axios.get(
+    `${API_URL}/get-custom-spells`,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
 }
 
 function addCustomSpell(data, jwt) {
-  return axios.post(`${API_URL}/add-custom-spell`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
+  return axios.post(
+    `${API_URL}/add-custom-spell`,
+    data,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
 }
 
 function deleteCustomSpell(data, jwt) {
-  return axios.post(`${API_URL}/delete-custom-spell`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
+  return axios.post(
+    `${API_URL}/delete-custom-spell`,
+    data,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
+}
+
+function editCustomSpell(data, jwt) {
+  return axios.post(
+    `${API_URL}/edit-custom-spell`,
+    data,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
+}
+
+function addCustomSpellToBook(data, jwt) {
+  return axios.post(
+    `${API_URL}/add-custom-spell-to-spellbook`,
+    data,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
+}
+
+function removeCustomSpellFromBook(data, jwt) {
+  return axios.post(
+    `${API_URL}/remove-custom-spell-from-spellbook`,
+    data,
+    { headers: { Authorization: `Bearer: ${jwt}` } },
+  );
 }
 
 export default {
@@ -58,9 +115,12 @@ export default {
   deleteBook,
   getBook,
   getAllBooksForUser,
-  addToBook,
-  removeFromBook,
+  addSpellToBook,
+  removeSpellFromBook,
   getCustomSpells,
   addCustomSpell,
   deleteCustomSpell,
+  editCustomSpell,
+  addCustomSpellToBook,
+  removeCustomSpellFromBook,
 };

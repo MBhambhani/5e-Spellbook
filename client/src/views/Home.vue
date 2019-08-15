@@ -22,6 +22,8 @@
     <v-content>
       <ClassSpellList
         @add-spell-to-book="handleAddSpellToBook"
+        @add-custom-spell-to-book="handleAddCustomSpellToBook"
+        @edit-custom-spell="handleEditCustomSpell"
         @delete-custom-spell="handleDeleteCustomSpell"
         :spellList="spellList"
         :spellbooks="spellbooks"
@@ -29,6 +31,7 @@
         v-if="!displayedBook"
       />
       <SpellBook
+        @remove-custom-spell-from-book="handleRemoveCustomSpellFromBook"
         @remove-spell-from-book="handleRemoveSpellFromBook"
         :spellList="spellList"
         v-else
@@ -144,8 +147,17 @@ export default {
           this.displayErrorMessage(error);
         });
     },
+    handleAddCustomSpellToBook(data) {
+      Utils.addCustomSpellToBook(data, this.jwt)
+        .then((response) => {
+          this.displaySuccessMessage(response);
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
+    },
     handleAddSpellToBook(data) {
-      Utils.addToBook(data, this.jwt)
+      Utils.addSpellToBook(data, this.jwt)
         .then((response) => {
           this.displaySuccessMessage(response);
         })
@@ -184,6 +196,15 @@ export default {
           this.displayErrorMessage(error);
         });
     },
+    handleEditCustomSpell(data) {
+      Utils.editCustomSpell(data, this.jwt)
+        .then(() => {
+          this.handleViewCustomSpells();
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
+    },
     handleLogin(userData) {
       this.isLoading = true;
       Utils.login(userData)
@@ -212,8 +233,22 @@ export default {
           this.displayErrorMessage(error);
         });
     },
+    handleRemoveCustomSpellFromBook(spellId) {
+      Utils.removeCustomSpellFromBook({
+        book_name: this.displayedBook,
+        spell_id: spellId,
+      }, this.jwt)
+        .then((response) => {
+          // refresh spells shown on page
+          this.handleViewBook(this.displayedBook);
+          this.displaySuccessMessage(response);
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
+    },
     handleRemoveSpellFromBook(spellId) {
-      Utils.removeFromBook({
+      Utils.removeSpellFromBook({
         book_name: this.displayedBook,
         spell_id: spellId,
       }, this.jwt)

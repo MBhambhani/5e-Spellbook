@@ -4,7 +4,7 @@
       <div class="text-xs-right">
         <v-spacer/>
         <DeleteButtonWithDialog
-          @confirm="removeSpell(spell.id)"
+          @confirm="removeSpell()"
           :icon="'clear'"
           :message="'Are you sure you want to remove ' + spell.name + '?'"
         />
@@ -35,9 +35,15 @@ export default {
   },
   props: ['spell'],
   methods: {
-    removeSpell(spell) {
-      this.$emit('remove-spell', spell);
+    removeSpell() {
       this.dialog = false;
+
+      if (this.spell.creator_id) {
+        // only custom spells have a creator_id field
+        this.$emit('remove-custom-spell', this.spell.id);
+      } else {
+        this.$emit('remove-spell', this.spell.id);
+      }
     },
   },
 };

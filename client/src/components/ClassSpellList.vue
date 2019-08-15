@@ -55,7 +55,7 @@
               />
               <DeleteButtonWithDialog
                 v-if="isCustom"
-                @confirm="deleteCustomSpell(props.item.name)"
+                @confirm="deleteCustomSpell(props.item.id)"
                 :icon="'delete'"
                 :message="'Are you sure you want to delete ' + props.item.name + '?'"
               />
@@ -100,14 +100,18 @@ export default {
     ],
   }),
   methods: {
-    addToBook(book, spell) {
-      this.$emit('add-spell-to-book', { book_name: book, spell_id: spell });
+    addToBook(book, spellId) {
+      if (this.isCustom) {
+        this.$emit('add-custom-spell-to-book', { book_name: book, spell_id: spellId });
+      } else {
+        this.$emit('add-spell-to-book', { book_name: book, spell_id: spellId });
+      }
     },
     editCustomSpell(spellData) {
       this.$emit('edit-custom-spell', spellData);
     },
-    deleteCustomSpell(spellName) {
-      this.$emit('delete-custom-spell', { spell_name: spellName });
+    deleteCustomSpell(spellId) {
+      this.$emit('delete-custom-spell', { spell_id: spellId });
     },
   },
 };

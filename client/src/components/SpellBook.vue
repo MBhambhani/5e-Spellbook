@@ -19,6 +19,7 @@
       <v-layout row wrap>
         <SpellCard
           v-for="(spell, index) in spellGroup.spells"
+          @remove-custom-spell="removeCustomSpellFromBook"
           @remove-spell="removeSpellFromBook"
           :spell="spell"
           :key="index"
@@ -39,8 +40,11 @@ export default {
   },
   props: ['spellList'],
   methods: {
-    removeSpellFromBook(spell) {
-      this.$emit('remove-spell-from-book', spell);
+    removeCustomSpellFromBook(spellId) {
+      this.$emit('remove-custom-spell-from-book', spellId);
+    },
+    removeSpellFromBook(spellId) {
+      this.$emit('remove-spell-from-book', spellId);
     },
   },
   computed: {

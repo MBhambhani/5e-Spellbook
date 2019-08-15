@@ -114,11 +114,13 @@ class Spellbook(db.Model):
   name = db.Column(db.String(100), nullable=False)
   creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
   spells = db.Column(db.String())
+  custom_spells = db.Column(db.String())
 
   def __init__(self, name, creator_id):
     self.name = name
     self.creator_id = creator_id
     self.spells = ''
+    self.custom_spells = ''
   
   @classmethod
   def find_by_name(cls, name, user_id):
@@ -130,30 +132,52 @@ class Spellbook(db.Model):
   def get_spells(self):
     if self.spells == '':
       return []
-    return self.spells.split(',')
+    return [int(sp) for sp in self.spells.split(',')]
+  
+  def get_custom_spells(self):
+    if self.custom_spells == '':
+      return []
+    return [int(sp) for sp in self.custom_spells.split(',')]
 
   def add_spell(self, spell_id):
     if spell_id in self.get_spells():
       return False
 
     if self.spells == '':
-      self.spells += spell_id
+      self.spells += str(spell_id)
     else:
-      self.spells += ',' + spell_id
+      self.spells += ',' + str(spell_id)
+    
+    return True
+
+  def add_custom_spell(self, spell_id):
+    if spell_id in self.get_custom_spells():
+      return False
+    
+    if self.custom_spells == '':
+      self.custom_spells += str(spell_id)
+    else:
+      self.custom_spells += ',' + str(spell_id)
     
     return True
   
   def remove_spell(self, spell_id):
     spells = self.get_spells()
     spells.remove(spell_id)
-    self.spells = ','.join(spells)
+    self.spells = ','.join(str(sp) for sp in spells)
+  
+  def remove_custom_spell(self, spell_id):
+    custom_spells = self.get_custom_spells()
+    custom_spells.remove(spell_id)
+    self.custom_spells = ','.join(str(sp) for sp in custom_spells)
   
   def serialize(self):
     return {
       'id': self.id,
       'name': self.name,
       'creator_id': self.creator_id,
-      'spells': self.spells
+      'spells': self.spells,
+      'custom_spells': self.custom_spells,
     }
 
 class CustomSpell(db.Model):

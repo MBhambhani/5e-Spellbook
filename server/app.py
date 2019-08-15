@@ -165,22 +165,26 @@ def get_user_spellbooks(user_id):
 @app.route('/get-spellbook', methods=['GET'])
 @token_required
 def get_spellbook(user_id):
-    book_name = request.args.get('name')
-
     try:
-        spellbook = Spellbook.find_by_name(book_name, user_id)
+        spellbook = Spellbook.find_by_name(request.args.get('name'), user_id)
 
         if not spellbook:
             return jsonify({ 'message': 'Spellbook not found' }), 422
         
         spell_list = []
         grouped_spells = [[] for i in range(0,10)]
-        spells = spellbook.get_spells()
+        spell_ids = spellbook.get_spells()
+        spells = Spell.query.filter(Spell.id.in_(spell_ids)).all()
+        custom_spell_ids = spellbook.get_custom_spells()
+        custom_spells = CustomSpell.query.filter(CustomSpell.id.in_(custom_spell_ids)).all()
 
         # get spells by id and group them by level
-        for spell_id in spells:
-            spell = Spell.query.filter(Spell.id == int(spell_id)).first()
+        for spell in spells:
             grouped_spells[spell.level].append(spell)
+
+        # get custom spells by id and group them by level
+        for custom_spell in custom_spells:
+            grouped_spells[custom_spell.level].append(custom_spell)
         
         # build spell list to return
         for i in range(0,10):
@@ -190,16 +194,14 @@ def get_spellbook(user_id):
     except Exception as e:
         return str(e)
 
-@app.route('/add-to-spellbook', methods=['POST'])
+@app.route('/add-spell-to-spellbook', methods=['POST'])
 @token_required
-def add_to_spellbook(user_id):
+def add_spell_to_spellbook(user_id):
     data = request.get_json()
-    book_name = data.get('book_name')
-    spell_id = data.get('spell_id')
 
     try:
-        spellbook = Spellbook.find_by_name(book_name, user_id)
-        spell = Spell.find_by_id(spell_id)
+        spellbook = Spellbook.find_by_name(data.get('book_name'), user_id)
+        spell = Spell.find_by_id(data.get('spell_id'))
 
         if not spellbook:
             return jsonify({ 'message': 'Spellbook not found' }), 422
@@ -207,7 +209,7 @@ def add_to_spellbook(user_id):
         if not spell:
             return jsonify({ 'message': 'Spell not found' }), 422
 
-        if not spellbook.add_spell(str(spell_id)):
+        if not spellbook.add_spell(spell.id):
             return jsonify({
                 'message': '{0} already contains {1}'.format(spellbook.name, spell.name)
                 }), 422
@@ -217,24 +219,22 @@ def add_to_spellbook(user_id):
     except Exception as e:
         return str(e)
 
-@app.route('/remove-from-spellbook', methods=['POST'])
+@app.route('/remove-spell-from-spellbook', methods=['POST'])
 @token_required
-def remove_from_spellbook(user_id):
+def remove_spell_from_spellbook(user_id):
     data = request.get_json()
-    book_name = data.get('book_name')
-    spell_id = data.get('spell_id')
 
     try:
-        spellbook = Spellbook.find_by_name(book_name, user_id)
-        spell = Spell.find_by_id(spell_id)
+        spellbook = Spellbook.find_by_name(data.get('book_name'), user_id)
+        spell = Spell.find_by_id(data.get('spell_id'))
 
         if not spellbook:
             return jsonify({ 'message': 'Spellbook not found' }), 422
 
         if not spell:
-            return jsonify({ 'message': 'Spell not found' }), 422
+            return jsonify({ 'message': 'Spell not found' }), 422    
 
-        spellbook.remove_spell(str(spell_id))
+        spellbook.remove_spell(spell.id)
         db.session.commit()
         return jsonify({ 'message': '{0} removed from {1}'.format(spell.name, spellbook.name) })
     except Exception as e:
@@ -297,11 +297,11 @@ def delete_custom_spell(user_id):
             return jsonify({ 'message': 'Spell not found' }), 422
         
         CustomSpell.query.filter(
-            CustomSpell.name == spell_name,
+            CustomSpell.id == spell_id,
             CustomSpell.creator_id == user_id
         ).delete()
         db.session.commit()
-        return jsonify({ 'message': '{} deleted'.format(spell_name) })
+        return jsonify({ 'message': '{} deleted'.format(spell_id) })
     except Exception as e:
         return str(e)
 
@@ -309,10 +309,13 @@ def delete_custom_spell(user_id):
 @token_required
 def edit_custom_spell(user_id):
     data = request.get_json()
-    spell_id = data.get('id')
 
     try:
-        spell = CustomSpell.find_by_id(spell_id, user_id)
+        spell = CustomSpell.find_by_id(data.get('id'), user_id)
+
+        if not spell:
+            return jsonify({ 'message': 'Spell not found' }), 422
+        
         spell.edit(
             data.get('name'),
             data.get('level'),
@@ -327,8 +330,56 @@ def edit_custom_spell(user_id):
             data.get('desc')
         )
         db.session.commit()
+        return jsonify({ 'message': 'Spell updated' })
     except Exception as e:
         return str(e)
+
+@app.route('/add-custom-spell-to-spellbook', methods=['POST'])
+@token_required
+def add_custom_spell_to_spellbook(user_id):
+    data = request.get_json()
+
+    try:
+        spellbook = Spellbook.find_by_name(data.get('book_name'), user_id)
+        spell = CustomSpell.find_by_id(data.get('spell_id'), user_id)
+
+        if not spellbook:
+            return jsonify({ 'message': 'Spellbook not found' }), 422
+
+        if not spell:
+            return jsonify({ 'message': 'Spell not found' }), 422
+
+        if not spellbook.add_custom_spell(spell.id):
+            return jsonify({
+                'message': '{0} already contains {1}'.format(spellbook.name, spell.name)
+                }), 422
+        
+        db.session.commit()
+        return jsonify({ 'message': '{0} added to {1}'.format(spell.name, spellbook.name) })
+    except Exception as e:
+        return str(e)
+
+@app.route('/remove-custom-spell-from-spellbook', methods=['POST'])
+@token_required
+def remove_custom_spell_from_spellbook(user_id):
+    data = request.get_json()
+
+    try:
+        spellbook = Spellbook.find_by_name(data.get('book_name'), user_id)
+        spell = CustomSpell.find_by_id(data.get('spell_id'), user_id)
+
+        if not spellbook:
+            return jsonify({ 'message': 'Spellbook not found' }), 422
+
+        if not spell:
+            return jsonify({ 'message': 'Spell not found' }), 422
+
+        spellbook.remove_custom_spell(spell.id)
+        db.session.commit()
+        return jsonify({ 'message': '{0} removed from {1}'.format(spell.name, spellbook.name) })
+    except Exception as e:
+        return str(e)
+    
 
 if __name__ == '__main__':
     app.run()

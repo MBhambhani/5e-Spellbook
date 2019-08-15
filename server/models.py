@@ -11,6 +11,7 @@ class User(db.Model):
   registered_on = db.Column(db.DateTime, nullable=False)
   last_login = db.Column(db.DateTime)
   spellbooks = db.relationship('Spellbook', backref='creator', lazy=False)
+  custom_spells = db.relationship('CustomSpell', backref='creator', lazy=False)
 
   def __init__(self, username, password, registered_on):
     self.username = username
@@ -35,7 +36,7 @@ class Spell(db.Model):
   __tablename__ = 'spells'
 
   id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String())
+  name = db.Column(db.String(), nullable=False)
   ritual = db.Column(db.Boolean())
   concentration = db.Column(db.Boolean())
   school = db.Column(db.String())
@@ -53,7 +54,7 @@ class Spell(db.Model):
   sorcerer = db.Column(db.Boolean())
   warlock = db.Column(db.Boolean())
   wizard = db.Column(db.Boolean())
-  level = db.Column(db.Integer())
+  level = db.Column(db.Integer, nullable=False)
 
   def __init__(self, name, ritual, concentration, school, casting_time,
     components, spell_range, duration, material, desc, bard, cleric,
@@ -142,4 +143,54 @@ class Spellbook(db.Model):
       'name': self.name,
       'creator_id': self.creator_id,
       'spells': self.spells
+    }
+
+class CustomSpell(db.Model):
+  __tablename__ = 'custom_spells'
+
+  id = db.Column(db.Integer, primary_key=True)
+  creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+  name = db.Column(db.String(100), nullable=False)
+  level = db.Column(db.Integer, nullable=False)
+  ritual = db.Column(db.Boolean())
+  concentration = db.Column(db.Boolean())
+  school = db.Column(db.String(100))
+  casting_time = db.Column(db.String(100))
+  components = db.Column(db.String(3))
+  spell_range = db.Column(db.String(100))
+  duration = db.Column(db.String(100))
+  material = db.Column(db.String(100))
+  desc = db.Column(db.Text())
+
+  def __init__(self, creator_id, name, level, ritual, concentration, school,
+    casting_time, components, spell_range, duration, material, desc):
+    self.creator_id = creator_id
+    self.name = name
+    self.level = level
+    self.ritual = ritual
+    self.concentration = concentration
+    self.school = school
+    self.casting_time = casting_time
+    self.components = components
+    self.spell_range = spell_range
+    self.duration = duration
+    self.material = material
+    self.desc = desc
+    self.creator_id = creator_id
+  
+  def serialize(self):
+    return {
+      'id': self.id,
+      'creator_id': self.creator_id,
+      'name': self.name,
+      'level': self.level,
+      'ritual': self.ritual,
+      'concentration': self.concentration,
+      'school': self.school,
+      'casting_time': self.casting_time,
+      'components': self.components,
+      'spell_range': self.spell_range,
+      'duration': self.duration,
+      'material': self.material,
+      'desc': self.desc,
     }

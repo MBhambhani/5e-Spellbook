@@ -56,23 +56,35 @@
               :append-icon="newBookName == '' ? '' : 'add'"
               @click:append="createBook()"
               color="secondary"
-              type="text"
-              placeholder="Add new spellbook"
+              placeholder="Add New Spellbook"
               class="body-1"
             />
           </v-list-tile-content>
         </v-list-tile>
       </v-list-group>
+      <v-list-tile v-if="isLoggedIn" @click="viewCustomSpells()">
+        <v-list-tile-content>
+          <v-list-tile-title>
+            My Custom Spells
+          </v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <CustomSpellDialog
+        v-if="isLoggedIn"
+        :isCreate="true"
+        @save="addCustomSpell"/>
     </v-list>
   </v-navigation-drawer>
 </template>
 
 <script>
+import CustomSpellDialog from './CustomSpellDialog.vue';
 import DeleteButtonWithDialog from './DeleteButtonWithDialog.vue';
 
 export default {
   name: 'NavBar',
   components: {
+    CustomSpellDialog,
     DeleteButtonWithDialog,
   },
   props: ['isDrawerOpen', 'isLoggedIn', 'spellbooks'],
@@ -103,6 +115,12 @@ export default {
     },
     deleteBook(book) {
       this.$emit('delete-book', { book_name: book });
+    },
+    viewCustomSpells() {
+      this.$emit('view-custom-spells');
+    },
+    addCustomSpell(data) {
+      this.$emit('add-custom-spell', data);
     },
   },
 };

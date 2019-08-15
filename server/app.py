@@ -13,10 +13,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 CORS(app, resources={r'/*': {'origins': '*'}})
 
-from models import User, Spell, Spellbook
+from models import User, Spell, Spellbook, CustomSpell
 
 def add_spells_to_list(spells, level, spell_list):
-    spell_list.append({ 'level': level, 'spells': [sp.serialize() for sp in spells] })
+    if spells:
+        spell_list.append({ 'level': level, 'spells': [sp.serialize() for sp in spells] })
 
 def token_required(f):
     @wraps(f)
@@ -106,7 +107,7 @@ def login():
             'iat': datetime.utcnow(),
             'exp': datetime.utcnow() + timedelta(days=1)
         }, current_app.config['SECRET_KEY'])
-
+        
         return jsonify({
             'token': token.decode('UTF-8'),
             'user_id': user.id,
@@ -152,7 +153,10 @@ def delete_spellbook(user_id):
         if not spellbook:
             return jsonify({ 'message': 'Spellbook not found' }), 422
         
-        Spellbook.query.filter(Spellbook.name == book_name).delete()
+        Spellbook.query.filter(
+            Spellbook.name == book_name,
+            Spellbook.creator_id == user_id
+        ).delete()
         db.session.commit()
         return jsonify({ 'message': '{} deleted'.format(book_name) })
     except Exception as e:
@@ -252,6 +256,81 @@ def remove_from_spellbook(user_id):
         spellbook.remove_spell(str(spell_id))
         db.session.commit()
         return jsonify({ 'message': '{0} removed from {1}'.format(spell.name, spellbook.name) })
+    except Exception as e:
+        return str(e)
+
+@app.route('/get-custom-spells', methods=['GET'])
+@token_required
+def get_custom_spells(user_id):
+    try:
+        spell_list = []
+
+        for i in range(0,10):
+            spells = CustomSpell.query.filter(
+                CustomSpell.level == i,
+                CustomSpell.creator_id == user_id
+            ).all()
+            add_spells_to_list(spells, i, spell_list)
+        return jsonify(spell_list)
+    except Exception as e:
+        return str(e)
+
+@app.route('/add-custom-spell', methods=['POST'])
+@token_required
+def add_custom_spell(user_id):
+    data = request.get_json()
+    name = data.get('name')
+    
+    try:
+        spell = CustomSpell.query.filter(
+            CustomSpell.name == name,
+            CustomSpell.creator_id == user_id
+        ).first()
+
+        if spell:
+            return jsonify({ 'message': 'Name already in use' }), 422
+        
+        new_spell = CustomSpell(
+            user_id,
+            name,
+            data.get('level'),
+            data.get('ritual'),
+            data.get('concentration'),
+            data.get('school'),
+            data.get('casting_time'),
+            data.get('components'),
+            data.get('spell_range'),
+            data.get('duration'),
+            data.get('material'),
+            data.get('desc')
+        )
+        db.session.add(new_spell)
+        db.session.commit()
+        return jsonify(new_spell.serialize()), 201
+    except Exception as e:
+        return str(e)
+
+@app.route('/delete-custom-spell', methods=['POST'])
+@token_required
+def delete_custom_spell(user_id):
+    data = request.get_json()
+    spell_name = data.get('spell_name')
+
+    try:
+        spell = CustomSpell.query.filter(
+            CustomSpell.name == spell_name,
+            CustomSpell.creator_id == user_id
+        ).first()
+
+        if not spell:
+            return jsonify({ 'message': 'Spell not found' }), 422
+        
+        CustomSpell.query.filter(
+            CustomSpell.name == spell_name,
+            CustomSpell.creator_id == user_id
+        ).delete()
+        db.session.commit()
+        return jsonify({ 'message': '{} deleted'.format(spell_name) })
     except Exception as e:
         return str(e)
 

@@ -23,13 +23,13 @@
           <td>{{ props.item.school }}</td>
           <td>{{ props.item.casting_time }}</td>
           <td style="width:20%">
-            <v-layout row>
+            <v-layout row align-center>
               <v-menu offset-y>
                 <template v-slot:activator="{ on }">
                   <v-btn
                     dark
                     small
-                    class="add-btn px-2"
+                    class="px-2"
                     v-on="on"
                     color="secondary"
                   >
@@ -47,6 +47,16 @@
                 </v-list>
               </v-menu>
               <SpellInfoModal :spell="props.item"/>
+              <CustomSpellDialog
+                @save="addCustomSpellToBook($event, book)"
+                :spell="props.item"
+                :isCreate="false"
+              />
+              <DeleteButtonWithDialog
+                @confirm="deleteCustomSpell(props.item.name)"
+                :icon="'delete'"
+                :message="'Are you sure you want to delete ' + props.item.name + '?'"
+              />
             </v-layout>
           </td>
         </template>
@@ -56,14 +66,18 @@
 </template>
 
 <script>
+import CustomSpellDialog from './CustomSpellDialog.vue';
+import DeleteButtonWithDialog from './DeleteButtonWithDialog.vue';
 import SpellInfoModal from './SpellInfoModal.vue';
 
 export default {
   name: 'ClassSpellList',
   components: {
+    CustomSpellDialog,
+    DeleteButtonWithDialog,
     SpellInfoModal,
   },
-  props: ['spellList', 'spellbooks'],
+  props: ['spellList', 'spellbooks', 'isCustom'],
   data: () => ({
     headers: [
       {
@@ -86,6 +100,12 @@ export default {
   methods: {
     addToBook(book, spell) {
       this.$emit('add-spell-to-book', { book_name: book, spell_id: spell });
+    },
+    addCustomSpellToBook(spellData, book) {
+      this.$emit('add-custom-spell-to-book', spellData, book);
+    },
+    deleteCustomSpell(spellName) {
+      this.$emit('delete-custom-spell', { spell_name: spellName });
     },
   },
 };

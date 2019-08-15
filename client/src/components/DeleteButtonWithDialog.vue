@@ -20,6 +20,7 @@
         <v-btn flat @click="confirm()">
           Yes
         </v-btn>
+        <v-spacer/>
         <v-btn flat @click="dialog = false">
           No
         </v-btn>

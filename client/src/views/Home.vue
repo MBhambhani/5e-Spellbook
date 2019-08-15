@@ -13,6 +13,8 @@
       @view-book="handleViewBook"
       @create-book="handleCreateBook"
       @delete-book="handleDeleteBook"
+      @view-custom-spells="handleViewCustomSpells"
+      @add-custom-spell="handleAddCustomSpell"
       :isDrawerOpen="isDrawerOpen"
       :isLoggedIn="isLoggedIn"
       :spellbooks="spellbooks"
@@ -20,6 +22,7 @@
     <v-content>
       <ClassSpellList
         @add-spell-to-book="handleAddSpellToBook"
+        @delete-custom-spell="handleDeleteCustomSpell"
         :spellList="spellList"
         :spellbooks="spellbooks"
         v-if="!displayedBook"
@@ -90,47 +93,35 @@ export default {
     isSnackbarError: false,
     snackbarText: '',
   }),
+  computed: {
+    isLoggedIn() {
+      if (!this.jwt) {
+        return false;
+      }
+      const token = this.jwt.split('.');
+      const body = JSON.parse(atob(token[1]));
+      return Date.now() < (body.exp * 1000);
+    },
+  },
+  mounted() {
+    if (this.jwt) {
+      this.getUserSpellbooks();
+    }
+  },
   methods: {
-    handleViewClassSpells(selectedClass) {
-      this.isLoading = true;
-      Utils.getSpells(selectedClass)
-        .then((response) => {
-          this.isLoading = false;
-          this.displayedBook = '';
-          this.displayedClass = selectedClass;
-          this.spellList = this.filterSpellList(response.data);
-        })
-        .catch((error) => {
-          this.displayErrorMessage(error);
-        });
+    displayErrorMessage(error) {
+      // eslint-disable-next-line
+      console.error(error);
+      this.isLoading = false;
+      this.snackbarText = error.response ? error.response.data.message : 'Error!';
+      this.isSnackbarError = true;
+      this.isSnackbarActive = true;
     },
-    handleRegister(userData) {
-      this.isLoading = true;
-      Utils.register(userData)
-        .then(() => {
-          this.handleLogin(userData);
-        })
-        .catch((error) => {
-          this.displayErrorMessage(error);
-        });
-    },
-    handleLogin(userData) {
-      this.isLoading = true;
-      Utils.login(userData)
-        .then((response) => {
-          this.jwt = response.data.token;
-          this.userId = response.data.user_id;
-          localStorage.setItem('jwt', this.jwt);
-          this.displaySuccessMessage(response);
-          this.getUserSpellbooks();
-        })
-        .catch((error) => {
-          this.displayErrorMessage(error);
-        });
-    },
-    handleLogout() {
-      this.jwt = '';
-      localStorage.removeItem('jwt');
+    displaySuccessMessage(response) {
+      this.isLoading = false;
+      this.snackbarText = response.data.message;
+      this.isSnackbarError = false;
+      this.isSnackbarActive = true;
     },
     getUserSpellbooks() {
       Utils.getAllBooksForUser(this.jwt)
@@ -141,14 +132,22 @@ export default {
           this.displayErrorMessage(error);
         });
     },
-    handleViewBook(name) {
-      this.isLoading = true;
-      Utils.getBook(name, this.jwt)
+    handleAddCustomSpell(data) {
+      Utils.addCustomSpell(data, this.jwt)
         .then((response) => {
-          this.isLoading = false;
-          this.displayedBook = name;
-          this.displayedClass = '';
-          this.spellList = this.filterSpellList(response.data);
+          this.displaySuccessMessage(response);
+          if (this.displayedClass === 'custom') {
+            this.handleViewCustomSpells();
+          }
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
+    },
+    handleAddSpellToBook(data) {
+      Utils.addToBook(data, this.jwt)
+        .then((response) => {
+          this.displaySuccessMessage(response);
         })
         .catch((error) => {
           this.displayErrorMessage(error);
@@ -176,10 +175,38 @@ export default {
           this.displayErrorMessage(error);
         });
     },
-    handleAddSpellToBook(data) {
-      Utils.addToBook(data, this.jwt)
+    handleDeleteCustomSpell(data) {
+      Utils.deleteCustomSpell(data, this.jwt)
+        .then(() => {
+          this.handleViewCustomSpells();
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
+    },
+    handleLogin(userData) {
+      this.isLoading = true;
+      Utils.login(userData)
         .then((response) => {
+          this.jwt = response.data.token;
+          this.userId = response.data.user_id;
+          localStorage.setItem('jwt', this.jwt);
           this.displaySuccessMessage(response);
+          this.getUserSpellbooks();
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
+    },
+    handleLogout() {
+      this.jwt = '';
+      localStorage.removeItem('jwt');
+    },
+    handleRegister(userData) {
+      this.isLoading = true;
+      Utils.register(userData)
+        .then(() => {
+          this.handleLogin(userData);
         })
         .catch((error) => {
           this.displayErrorMessage(error);
@@ -199,38 +226,45 @@ export default {
           this.displayErrorMessage(error);
         });
     },
-    filterSpellList(data) {
-      return data.filter(sp => sp.spells && sp.spells.length > 0);
+    handleViewBook(name) {
+      this.isLoading = true;
+      Utils.getBook(name, this.jwt)
+        .then((response) => {
+          this.isLoading = false;
+          this.displayedBook = name;
+          this.displayedClass = '';
+          this.spellList = response.data;
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
     },
-    displaySuccessMessage(response) {
-      this.isLoading = false;
-      this.snackbarText = response.data.message;
-      this.isSnackbarError = false;
-      this.isSnackbarActive = true;
+    handleViewClassSpells(selectedClass) {
+      this.isLoading = true;
+      Utils.getSpells(selectedClass)
+        .then((response) => {
+          this.isLoading = false;
+          this.displayedBook = '';
+          this.displayedClass = selectedClass;
+          this.spellList = response.data;
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
     },
-    displayErrorMessage(error) {
-      // eslint-disable-next-line
-      console.error(error);
-      this.isLoading = false;
-      this.snackbarText = error.response ? error.response.data.message : 'Error!';
-      this.isSnackbarError = true;
-      this.isSnackbarActive = true;
+    handleViewCustomSpells() {
+      this.isLoading = true;
+      Utils.getCustomSpells(this.jwt)
+        .then((response) => {
+          this.isLoading = false;
+          this.displayedBook = '';
+          this.displayedClass = 'custom';
+          this.spellList = response.data;
+        })
+        .catch((error) => {
+          this.displayErrorMessage(error);
+        });
     },
-  },
-  computed: {
-    isLoggedIn() {
-      if (!this.jwt) {
-        return false;
-      }
-      const token = this.jwt.split('.');
-      const body = JSON.parse(atob(token[1]));
-      return Date.now() < (body.exp * 1000);
-    },
-  },
-  mounted() {
-    if (this.jwt) {
-      this.getUserSpellbooks();
-    }
   },
 };
 </script>

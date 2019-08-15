@@ -38,6 +38,18 @@ function removeFromBook(data, jwt) {
   return axios.post(`${API_URL}/remove-from-spellbook`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
+function getCustomSpells(jwt) {
+  return axios.get(`${API_URL}/get-custom-spells`, { headers: { Authorization: `Bearer: ${jwt}` } });
+}
+
+function addCustomSpell(data, jwt) {
+  return axios.post(`${API_URL}/add-custom-spell`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
+}
+
+function deleteCustomSpell(data, jwt) {
+  return axios.post(`${API_URL}/delete-custom-spell`, data, { headers: { Authorization: `Bearer: ${jwt}` } });
+}
+
 export default {
   getSpells,
   register,
@@ -48,4 +60,7 @@ export default {
   getAllBooksForUser,
   addToBook,
   removeFromBook,
+  getCustomSpells,
+  addCustomSpell,
+  deleteCustomSpell,
 };

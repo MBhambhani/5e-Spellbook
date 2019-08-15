@@ -101,6 +101,7 @@ export default {
   mounted() {
     const { spell } = this;
     if (spell) {
+      this.id = spell.id;
       this.name = spell.name;
       this.level = spell.level;
       this.school = spell.school;
@@ -120,6 +121,7 @@ export default {
     dialog: false,
     iconColor: 'grey',
     spellLevels: [...Array(10).keys()],
+    id: -1,
     name: '',
     level: 0,
     school: '',
@@ -142,6 +144,7 @@ export default {
       if (this.componentS) { components += 'S'; }
       if (this.componentM) { components += 'M'; }
       this.$emit('save', {
+        id: this.id,
         name: this.name,
         level: this.level,
         ritual: this.ritual,

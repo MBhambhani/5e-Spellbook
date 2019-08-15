@@ -25,6 +25,7 @@
         @delete-custom-spell="handleDeleteCustomSpell"
         :spellList="spellList"
         :spellbooks="spellbooks"
+        :isCustom="displayedClass === 'custom'"
         v-if="!displayedBook"
       />
       <SpellBook
@@ -134,8 +135,7 @@ export default {
     },
     handleAddCustomSpell(data) {
       Utils.addCustomSpell(data, this.jwt)
-        .then((response) => {
-          this.displaySuccessMessage(response);
+        .then(() => {
           if (this.displayedClass === 'custom') {
             this.handleViewCustomSpells();
           }

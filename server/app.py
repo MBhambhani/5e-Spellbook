@@ -123,12 +123,7 @@ def create_spellbook(user_id):
     book_name = data.get('book_name')
 
     try:
-        spellbook = Spellbook.query.filter(
-            Spellbook.name == book_name,
-            Spellbook.creator_id == user_id
-        ).first()
-
-        if spellbook:
+        if Spellbook.find_by_name(book_name, user_id):
             return jsonify({ 'message': 'Name already in use' }), 422
         
         new_spellbook = Spellbook(book_name, user_id)
@@ -145,12 +140,7 @@ def delete_spellbook(user_id):
     book_name = data.get('book_name')
 
     try:
-        spellbook = Spellbook.query.filter(
-            Spellbook.name == book_name,
-            Spellbook.creator_id == user_id
-        ).first()
-
-        if not spellbook:
+        if not Spellbook.find_by_name(book_name, user_id):
             return jsonify({ 'message': 'Spellbook not found' }), 422
         
         Spellbook.query.filter(
@@ -178,10 +168,7 @@ def get_spellbook(user_id):
     book_name = request.args.get('name')
 
     try:
-        spellbook = Spellbook.query.filter(
-            Spellbook.name == book_name,
-            Spellbook.creator_id == user_id
-        ).first()
+        spellbook = Spellbook.find_by_name(book_name, user_id)
 
         if not spellbook:
             return jsonify({ 'message': 'Spellbook not found' }), 422
@@ -211,11 +198,8 @@ def add_to_spellbook(user_id):
     spell_id = data.get('spell_id')
 
     try:
-        spellbook = Spellbook.query.filter(
-            Spellbook.name == book_name,
-            Spellbook.creator_id == user_id
-        ).first()
-        spell = Spell.query.filter_by(id=spell_id).first()
+        spellbook = Spellbook.find_by_name(book_name, user_id)
+        spell = Spell.find_by_id(spell_id)
 
         if not spellbook:
             return jsonify({ 'message': 'Spellbook not found' }), 422
@@ -241,11 +225,8 @@ def remove_from_spellbook(user_id):
     spell_id = data.get('spell_id')
 
     try:
-        spellbook = Spellbook.query.filter(
-            Spellbook.name == book_name,
-            Spellbook.creator_id == user_id
-        ).first()
-        spell = Spell.query.filter_by(id=spell_id).first()
+        spellbook = Spellbook.find_by_name(book_name, user_id)
+        spell = Spell.find_by_id(spell_id)
 
         if not spellbook:
             return jsonify({ 'message': 'Spellbook not found' }), 422
@@ -279,20 +260,15 @@ def get_custom_spells(user_id):
 @token_required
 def add_custom_spell(user_id):
     data = request.get_json()
-    name = data.get('name')
+    spell_name = data.get('name')
     
     try:
-        spell = CustomSpell.query.filter(
-            CustomSpell.name == name,
-            CustomSpell.creator_id == user_id
-        ).first()
-
-        if spell:
+        if CustomSpell.find_by_name(spell_name, user_id):
             return jsonify({ 'message': 'Name already in use' }), 422
         
         new_spell = CustomSpell(
             user_id,
-            name,
+            spell_name,
             data.get('level'),
             data.get('ritual'),
             data.get('concentration'),
@@ -314,15 +290,10 @@ def add_custom_spell(user_id):
 @token_required
 def delete_custom_spell(user_id):
     data = request.get_json()
-    spell_name = data.get('spell_name')
+    spell_id = data.get('spell_id')
 
     try:
-        spell = CustomSpell.query.filter(
-            CustomSpell.name == spell_name,
-            CustomSpell.creator_id == user_id
-        ).first()
-
-        if not spell:
+        if not CustomSpell.find_by_id(spell_id, user_id):
             return jsonify({ 'message': 'Spell not found' }), 422
         
         CustomSpell.query.filter(
@@ -331,6 +302,31 @@ def delete_custom_spell(user_id):
         ).delete()
         db.session.commit()
         return jsonify({ 'message': '{} deleted'.format(spell_name) })
+    except Exception as e:
+        return str(e)
+
+@app.route('/edit-custom-spell', methods=['POST'])
+@token_required
+def edit_custom_spell(user_id):
+    data = request.get_json()
+    spell_id = data.get('id')
+
+    try:
+        spell = CustomSpell.find_by_id(spell_id, user_id)
+        spell.edit(
+            data.get('name'),
+            data.get('level'),
+            data.get('ritual'),
+            data.get('concentration'),
+            data.get('school'),
+            data.get('casting_time'),
+            data.get('components'),
+            data.get('spell_range'),
+            data.get('duration'),
+            data.get('material'),
+            data.get('desc')
+        )
+        db.session.commit()
     except Exception as e:
         return str(e)
 

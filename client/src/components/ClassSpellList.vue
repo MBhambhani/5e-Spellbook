@@ -48,11 +48,13 @@
               </v-menu>
               <SpellInfoModal :spell="props.item"/>
               <CustomSpellDialog
-                @save="addCustomSpellToBook($event, book)"
+                v-if="isCustom"
+                @save="editCustomSpell"
                 :spell="props.item"
                 :isCreate="false"
               />
               <DeleteButtonWithDialog
+                v-if="isCustom"
                 @confirm="deleteCustomSpell(props.item.name)"
                 :icon="'delete'"
                 :message="'Are you sure you want to delete ' + props.item.name + '?'"
@@ -101,8 +103,8 @@ export default {
     addToBook(book, spell) {
       this.$emit('add-spell-to-book', { book_name: book, spell_id: spell });
     },
-    addCustomSpellToBook(spellData, book) {
-      this.$emit('add-custom-spell-to-book', spellData, book);
+    editCustomSpell(spellData) {
+      this.$emit('edit-custom-spell', spellData);
     },
     deleteCustomSpell(spellName) {
       this.$emit('delete-custom-spell', { spell_name: spellName });

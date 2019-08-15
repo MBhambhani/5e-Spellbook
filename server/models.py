@@ -79,6 +79,10 @@ class Spell(db.Model):
     self.wizard = wizard
     self.level = level
   
+  @classmethod
+  def find_by_id(cls, spell_id):
+    return cls.query.filter_by(id=spell_id).first()
+
   def serialize(self):
     return {
       'id': self.id,
@@ -116,6 +120,13 @@ class Spellbook(db.Model):
     self.creator_id = creator_id
     self.spells = ''
   
+  @classmethod
+  def find_by_name(cls, name, user_id):
+    return cls.query.filter(
+      cls.name == name,
+      cls.creator_id == user_id
+    ).first()
+
   def get_spells(self):
     if self.spells == '':
       return []
@@ -176,7 +187,34 @@ class CustomSpell(db.Model):
     self.duration = duration
     self.material = material
     self.desc = desc
-    self.creator_id = creator_id
+  
+  @classmethod
+  def find_by_id(cls, spell_id, user_id):
+    return cls.query.filter(
+      cls.id == spell_id,
+      cls.creator_id == user_id
+    ).first()
+
+  @classmethod
+  def find_by_name(cls, name, user_id):
+    return cls.query.filter(
+      cls.name == name,
+      cls.creator_id == user_id
+    ).first()
+  
+  def edit(self, name, level, ritual, concentration, school, casting_time,
+    components, spell_range, duration, material, desc):
+    self.name = name
+    self.level = level
+    self.ritual = ritual
+    self.concentration = concentration
+    self.school = school
+    self.casting_time = casting_time
+    self.components = components
+    self.spell_range = spell_range
+    self.duration = duration
+    self.material = material
+    self.desc = desc
   
   def serialize(self):
     return {
